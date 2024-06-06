@@ -9,9 +9,9 @@ from google.cloud import storage
 import numpy as np
 import pandas as pd
 
-from naip_asr.dataset import WaveDataset, collate_asr
-from naip_asr.models.asr import W2V2ForASR, WhisperForASR
-from naip_asr.io import upload_to_gcs, search_gcs, download_checkpoint_from_gcs
+from master_audio.dataset import WaveDataset, collate_asr
+from master_audio.models.asr import W2V2ForASR, WhisperForASR
+from master_audio.io import upload_to_gcs, search_gcs, download_checkpoint_from_gcs
 from torch.utils.data import  DataLoader
 from tqdm import tqdm
 

@@ -6,9 +6,9 @@ import pandas as pd
 import torch
 from torch.utils.data import  DataLoader
 
-from naip_asr.io import load_input_data
-from naip_asr.dataset import WaveDataset, collate_clf
-from naip_asr.models.classification import W2V2FeatureExtractor, W2V2ForClassification, ASTModel_pretrain, ASTModel_finetune
+from master_audio.io import load_input_data
+from master_audio.dataset import WaveDataset, collate_clf
+from master_audio.models.classification import W2V2FeatureExtractor, W2V2ForClassification, ASTModel_pretrain, ASTModel_finetune
 from ._classify import Classify
 
 

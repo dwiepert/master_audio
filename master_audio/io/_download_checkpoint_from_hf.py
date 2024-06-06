@@ -11,7 +11,7 @@ from typing import Optional, Union
 
 from huggingface_hub import hf_hub_download, snapshot_download
 
-from naip_asr.constants import *
+from master_audio.constants import *
 
 def download_checkpoint_from_hf(checkpoint: Union[str, Path],  model_type: str = None, model_size: str = None,
                                 repo_id: Optional[str] = None, filename: Optional[str]=None, subfolder: Optional[str] = None):

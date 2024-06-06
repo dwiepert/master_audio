@@ -11,7 +11,7 @@ from tqdm import tqdm
 import numpy as np
 import pandas as pd
 
-from naip_asr.io import upload_to_gcs
+from master_audio.io import upload_to_gcs
 
 class Classify:
     """

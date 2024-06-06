@@ -16,7 +16,7 @@ from typing import List, Optional, Union
 #third-party
 from tqdm import tqdm
 from huggingface_hub import hf_hub_url
-from naip_asr.constants import *
+from master_audio.constants import *
 
 #source: https://github.com/openai/whisper/blob/main/whisper/__init__.py
 

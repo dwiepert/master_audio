@@ -2,13 +2,13 @@
 Includes a handful of model types implemented to get transcriptions (for single audio files - batches not yet implemented), timestamps, and find pauses over a certain duration. Also contains simple metrics like WER/CER
 
 ## Installation
-To intall naip-asr, follow the instructions below
+To intall master_audio, follow the instructions below
 
 ```
-   $ git clone https://github.com/dwiepert/naip_asr.git
-   $ cd naip_asr
+   $ git clone https://github.com/dwiepert/master_audio.git
+   $ cd master_audio
    $ conda env create -f environment.yml
-   $ conda activate naip_asr
+   $ conda activate master_audio
    $ pip install .
 ```
 
@@ -124,7 +124,7 @@ All models have the following method:
 #### Whisper
 Initialize whisper with the following parameters:
 ```
-from naip_asr.models import WhisperForASR
+from master_audio.models import WhisperForASR
 model = WhisperForASR(checkpoint = checkpoint, model_size=model_size)
 ```
 Where `checkpoint` is either just the model size as a string (e.g. 'base', 'medium') or a full file path to a `.pt` file.
@@ -132,7 +132,7 @@ Where `checkpoint` is either just the model size as a string (e.g. 'base', 'medi
 #### W2V2
 Initialize W2V2 with the following parameters:
 ```
-from naip_asr.models import W2V2ForASR
+from master_audio.models import W2V2ForASR
 model = W2V2ForASR(checkpoint = checkpoint, model_size=model_size)
 ```
 Where `checkpoint` is either a hugging face repo name or a path to a local directory containing the model files.

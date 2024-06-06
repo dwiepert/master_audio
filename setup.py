@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
-from naip_asr._version import __version__
+from master_audio._version import __version__
 
 setup(
-    name = 'naip_asr.py',
+    name = 'master_audio.py',
     packages = find_packages(),
     author = 'The Mayo Clinic Neurology AI Program',
     version = __version__,

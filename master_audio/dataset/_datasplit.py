@@ -6,7 +6,7 @@ import tempfile
 from pathlib import Path
 from typing import List, Union
 
-from naip_asr.io import search_gcs, upload_to_gcs
+from master_audio.io import search_gcs, upload_to_gcs
 
 
 def generate_datasplit(input_dir: Union[str, Path], datasplit_dir: Union[str, Path], cloud: dict, 

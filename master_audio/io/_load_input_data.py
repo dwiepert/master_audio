@@ -5,7 +5,7 @@ import tempfile
 
 import pandas as pd
 
-from naip_asr.io import upload_to_gcs
+from master_audio.io import upload_to_gcs
 
 def load_input_data(data_split_root: Union[str, Path], target_labels: List[str], output_dir: Union[str,Path], 
                     cloud:dict, bucket, val_size:int= 50, seed:int=None, uid_col='uid', subject_col='subject') -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
