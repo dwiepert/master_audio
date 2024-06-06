@@ -6,3 +6,4 @@ environment2.yml
 naip_asr/vertexai_support/clf_config.json
 /speech
 test.py
+/.vscode
