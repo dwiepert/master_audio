@@ -1,0 +1,65 @@
+{
+    "workerPoolSpecs": [
+      {
+        "machineSpec": {
+          "machineType": "n1-highmem-2",
+          "acceleratorType": "NVIDIA_TESLA_T4",
+          "acceleratorCount": 1
+        },
+        "replicaCount": "1",
+        "diskSpec": {
+          "bootDiskType": "pd-ssd",
+          "bootDiskSizeGb": 100
+        },
+        "containerSpec": {
+          "imageUri": "us-central1-docker.pkg.dev/aif-usr-p-naip-netd-d2d1/aif-docker-naip-us-central1-2169/vertexttest:m144443-latest",
+          "args": [
+            "--prefix=speech_ai/speech_lake/",
+            "--study=speech_poc_freeze_1",
+            "--data_split_root=gs://data-ingest-quarantine/speech/speech_ai/share/data_splits/amr_subject_dedup_594_train_100_test_binarized_v20220620",
+            "--label_txt=gs://data-ingest-quarantine/speech/m144443/archive/projects/w2v2_layers/labels_multiclf.txt",
+            "--lib=False",
+            "--checkpoint=gs://data-ingest-quarantine/speech/m144443/checkpoints/wav2vec2-base-960h",
+          "--bucket_name=data-ingest-quarantine",
+          "--project_name=aif-usr-p-naip-netd-d2d1",
+          "--cloud=True",
+          "--dataset=TODO",
+          "--exp_dir=./experiments",
+          "--cloud_dir=speech/m144443/archive/projects/w2v2_layers/testvertex",
+          "--mode=finetune",
+          "--weighted=False",
+          "--shared_dense=False",
+          "--sd_bottleneck=768",
+          "--layer=-1",
+          "--freeze=True",
+          "--resample_rate=16000",
+          "--reduce=True",
+          "--clip_length=10.0",
+          "--tshift=0",
+          "--speed=0",
+          "--gauss=0",
+          "--pshift=0",
+          "--pshiftn=0",
+          "--gain=0",
+          "--stretch=0",
+          "--mixup=0",
+          "--pooling_mode=mean",
+          "--batch_size=8",
+          "--num_workers=0",
+          "--learning_rate=0.0001",
+          "--epochs=1",
+          "--optim=adamw",
+          "--weight_decay=0.0001",
+          "--loss=BCE",
+          "--scheduler=onecycle",
+          "--max_lr=0.01",
+          "--activation=relu",
+          "--final_dropout=0.3",
+          "--layernorm=False",
+          "--clf_bottleneck=768",
+          "--debug=False"
+          ]
+        }
+      }
+    ]
+  }

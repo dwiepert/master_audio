@@ -13,10 +13,10 @@ from torch.utils.data import Dataset
 
 
 #local
-from naip_asr.data_transforms.audio import *
-from naip_asr.data_transforms.common import *
-from naip_asr.data_transforms.spectrogram import *
-from naip_asr.constants import *
+from master_audio.data_transforms.audio import *
+from master_audio.data_transforms.common import *
+from master_audio.data_transforms.spectrogram import *
+from master_audio.constants import *
      
 class WaveDataset(Dataset):
     def __init__(self, data:Union[pd.DataFrame, np.ndarray],  prefix:str, model_type:str, model_task:str,

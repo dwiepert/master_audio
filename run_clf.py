@@ -13,10 +13,10 @@ import numpy as np
 from google.cloud import storage
 import torch
 
-from naip_asr.io import download_checkpoint_from_gcs, upload_to_gcs, search_gcs, download_file_to_local
-from naip_asr.dataset import generate_datasplit
-from naip_asr.models.classification import *
-from naip_asr.tasks import ClassificationWrapper
+from master_audio.io import download_checkpoint_from_gcs, upload_to_gcs, search_gcs, download_file_to_local
+from master_audio.dataset import generate_datasplit
+from master_audio.models.classification import *
+from master_audio.tasks import ClassificationWrapper
 
 def _check_args(args):
     """
