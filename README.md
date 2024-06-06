@@ -14,7 +14,7 @@ To intall master_audio, follow the instructions below
 
 ## Model Checkpoints
 There are a handful of ways to specify and work with checkpoints
-1. Some models can be given a `repo_id` or that is a relative path/model name. For example, Whisper can take `"large"` as a checkpoint to specify which model to use (see [Whisper models](https://github.com/openai/whisper?tab=readme-ov-file#available-models-and-languages) for more. In this case, the model size is the checkpoint). Wav2Vec2 can take some hugging face repo names like `"facebook/wav2vec2-base-960h"`. For some more examples, see [_constants.py](TODO).
+1. Some models can be given a `repo_id` or that is a relative path/model name. For example, Whisper can take `"large"` as a checkpoint to specify which model to use (see [Whisper models](https://github.com/openai/whisper?tab=readme-ov-file#available-models-and-languages) for more. In this case, the model size is the checkpoint). Wav2Vec2 can take some hugging face repo names like `"facebook/wav2vec2-base-960h"`. For some more examples, see [_constants.py](https://github.com/dwiepert/master_audio/blob/main/master_audio/constants/_constants.py).
 2. All models can be given a local directory or file with the pretrained model. This package includes a few ways to download these models to the local directory.
    - Whisper: For local checkpoints, you must download a `.pt` file. These checkpoints can be downloaded using `download_checkpoint_from_url`. If a downloaded model is saved on google cloud storage for space saving, it can also be downloaded using `download_checkpoint_from_gcs`. When giving a local checkpoint to the model, it must be given as the full file path to the `.pt` file (e.g. `local_dir_path\medium.pt`)
    - W2V2: For local checkpoints, you must download the entire checkpoint directory from hugging face using `download_checkpoint_from_hf`. Otherwise, if the directory is saved to the cloud, it can also be downloaded using `download_checkpoint_from_gcs`. Note that `download_checkpoint_from_hf` has pre-built options that can be downloaded ("base", "large", "large-robust", "large-self"), or you can give a `repo_id` and other identifying informationto download checkpoints outside of the pre-built options. The `repo_id` must be from [huggingface.co](https://huggingface.co). When giving a local checkpoint to the model, it must be given as the full path to a downloaded checkpoint directory (e.g. `local_dir_path\w2v2-base-960h`)
@@ -47,7 +47,7 @@ Note that this function requires access to GCS, which can be given with `gcloud 
 
 
 ## Data Transforms
-There are many optional data transform classes. Many of these can be implemented with `WaveDataset` (TODO) through creating a `dataset_config` dictionary with parameters for the transforms.
+There are many optional data transform classes. Many of these can be implemented with [`WaveDataset`](https://github.com/dwiepert/master_audio/blob/main/master_audio/dataset/_wave_dataset.py) through creating a `dataset_config` dictionary with parameters for the transforms.
 
 ### Common Transforms 
 * `ToNumpy`: Convert waveform in sample to Numpy (not compatible with spectrograms)
@@ -58,9 +58,9 @@ There are many optional data transform classes. Many of these can be implemented
 ### Audio Transforms
 Basic Preprocessing of wav files:
 * `Resample`: resample a waveform to `resample_rate`. In `dataset_config`, set the new sampling rate with `resample_rate` and specify whether to resample with librosa using `use_librosa`.
-* `ToMonophonic`: convert to monochannel with a reduce function. The `reduce_fn` is not pre-specified. See `WaveDataset` `_getaudiotransforms()` (TODO) for an example of a function. In `dataset_config`, set `monochannel` to True to convert to monochannel.
+* `ToMonophonic`: convert to monochannel with a reduce function. The `reduce_fn` is not pre-specified. See [`WaveDataset` `_getaudiotransforms()`](https://github.com/dwiepert/master_audio/blob/main/master_audio/dataset/_wave_dataset.py) for an example of a function. In `dataset_config`, set `monochannel` to True to convert to monochannel.
 * `TrimBeginningEndSilence`: trim the beginning and end silence based on `db_threshold`. Set in `dataset_config` with `trim_db`.
-* `Truncate`: cut audio to a specified `length` with and optional `offset`. Set clip length to truncate to in `dataset_config` with `clip_length`. `offset` is not set, but this can be changed in `WaveDataset` `__init__` and `_getaudiotransforms()` (TODO) and a key can be added to `dataset_config`.
+* `Truncate`: cut audio to a specified `length` with and optional `offset`. Set clip length to truncate to in `dataset_config` with `clip_length`. `offset` is not set, but this can be changed in `WaveDataset` `__init__` and `_getaudiotransforms()` and a key can be added to `dataset_config`.
 * `WaveMean`: subtract the mean from the waveform. This is implemented automatically for classification.
 
 Data augmentation of audio files using audiomentations (https://github.com/iver56/audiomentations?tab=readme-ov-file). See below for the variable to set the probablity of the transform in `dataset_config`. Other parameters can be adjusted manually in `WaveDataset` if you would like to change defaults.
@@ -102,16 +102,16 @@ Initialize with the following parameters:
 * `prefix`: location of files to download (compatible with gcs)
 * `model_type`: type of model this Dataset will be used with (e.g. w2v2, whisper)
 * `model_task`: model task for this Dataset (e.g. asr, classification)
-* `dataset_config`: dictionary with transform parameters (see Transforms (TODO: link)). Different for asr and classification. See examples in run_asr and run_clf (TODO: link)
+* `dataset_config`: dictionary with transform parameters (see [Transforms](https://github.com/dwiepert/master_audio/tree/main/master_audio/data_transforms) or `WaveDataset` for transform options. Different for asr and classification. See examples of arguments to include in `run_asr` and `run_clf`.)
 * `target_labels`: str list of targets to extract from data. Can be none only for 'asr'.
 * `bucket`: gcs bucket if data is in bucket. If not given, assumes local.  
 
 ### Collate functions
-Rather than use default collate function, use one of the following when initializing the `DataLoader(Dataset, collate_fn=..., batch_size=...)` depending on the task. `collate_asr` for ASR, `collate_clf` for classification. No parameters need to be initialized. See an example in [ClassificationWrapper(...)](TODO).
+Rather than use default collate function, use one of the following when initializing the `DataLoader(Dataset, collate_fn=..., batch_size=...)` depending on the task. [`collate_asr`](https://github.com/dwiepert/master_audio/blob/main/master_audio/dataset/_collate_asr.py) for ASR, [`collate_clf`](https://github.com/dwiepert/master_audio/blob/main/master_audio/dataset/_collate_clf.py) for classification. No parameters need to be initialized. See an example in [ClassificationWrapper(...)](https://github.com/dwiepert/master_audio/blob/main/master_audio/tasks/_clf_model_wrapper.py).
 
 
 ## Using ASR Models
-See examples of using ASR model in [run_asr.py](TODO).
+See examples of using ASR model in [run_asr.py](https://github.com/dwiepert/master_audio/blob/main/run_asr.py).
 Please note that Whisper models take a longer time to transcribe an audio file depending on the length of the file as it was originally built to only handle 30s clips.
 
 ### Models and functionality
@@ -144,16 +144,16 @@ Word error rate (`wer(...)`) and character error rate (`cer(...)`)are both imple
 - print: boolean indicating whether to print aligned transcription to console (default = False)
 
 ## Using Classification Models
-See examples of using Classification models in [run_clf.py](TODO). The primary code for running classification models is in [_clf_model_wrapper.py](TODO) and (_classify.py). The arguments that are required in each config dictionary are included in `run_clf.py`. 
+See examples of using Classification models in [run_clf.py](https://github.com/dwiepert/master_audio/blob/main/run_clf.py). The primary code for running classification models is in [`_clf_model_wrapper.py`](https://github.com/dwiepert/master_audio/blob/main/master_audio/tasks/_clf_model_wrapper.py) and [_classify.py](https://github.com/dwiepert/master_audio/blob/main/master_audio/tasks/_classify.py). The arguments that are required in each config dictionary are included in `run_clf.py`. 
 
 ### Datasplit
-When running classification, generating a datasplit is required. The data splits are expected to be in a single directory with the names `train.csv` and `test.csv` with an optional `validation.csv`. If a datasplit is not already prepared, one can be generated with [generate_datasplit(...)](TODO). See code for required arguments. Note that the metadata for the datasplit must be a csv with the target labels included as columns and at least a uid column (optionally also a subject column). The datasplit can then be generated at either the file or subject level.
+When running classification, generating a datasplit is required. The data splits are expected to be in a single directory with the names `train.csv` and `test.csv` with an optional `validation.csv`. If a datasplit is not already prepared, one can be generated with [generate_datasplit(...)](https://github.com/dwiepert/master_audio/blob/main/master_audio/dataset/_datasplit.py). See code for required arguments. Note that the metadata for the datasplit must be a csv with the target labels included as columns and at least a uid column (optionally also a subject column). The datasplit can then be generated at either the file or subject level.
 
 ### Functionality
-This implementation contains many functionality options as listed below. Arguments are set in [run_clf.py](TODO) example.
+This implementation contains many functionality options as listed below. Arguments are set in [run_clf.py](https://github.com/dwiepert/master_audio/blob/main/run_clf.py) example.
 
 #### 1. Pretraining
-You can pretrain an SSAST model from scratch using the `ASTModel_pretrain` class in [_ast_classification.py](TODO), along with the `pretrain(...)` function of the [`Classify`](TODO) class. 
+You can pretrain an SSAST model from scratch using the `ASTModel_pretrain` class in [_ast_classification.py](https://github.com/dwiepert/master_audio/blob/main/master_audio/models/classification/_ast_classification.py), along with the `pretrain(...)` function of the [`Classify`](https://github.com/dwiepert/master_audio/blob/main/master_audio/tasks/_classify.py) class. 
 
 This mode is triggered by setting `--mode` to 'pretrain' and also specifying which pretraining task to use with `--ssast_task`. The options are 'pretrain_mpc', 'pretrain_mpg', or 'pretrain_joint' which uses both previous tasks.
 
@@ -162,11 +162,11 @@ This function is compatible with data augmentations.
 This implementation currently can not continue pretraining from an already pretrained model checkpoint. 
 
 ### 2. Finetuning
-You can finetune models for classifying speech features using the `ASTModel_finetune` class in [_ast_classification.py](TODO) and [_w2v2_classification](TODO) and the `finetune(...)` function in the [`Classify`](TODO) class. 
+You can finetune models for classifying speech features using the `ASTModel_finetune` class in [_ast_classification.py](https://github.com/dwiepert/master_audio/blob/main/master_audio/models/classification/_ast_classification.py) and [_w2v2_classification](https://github.com/dwiepert/master_audio/blob/main/master_audio/models/classification/_w2v2_classification.py) and the `finetune(...)` function in the [`Classify`](https://github.com/dwiepert/master_audio/blob/main/master_audio/tasks/_classify.py) class. 
 
-This mode is triggered by setting `-m, --mode` to 'finetune' and if using an `ASTModel`, also specifying which finetuning task to use with `--task`. The options are 'ft_cls' or 'ft_avgtok'. See `_cls(x)` and `_avgtok(x)` in [`ASTModel_finetune`](TODO) for more information on how merging is done. 
+This mode is triggered by setting `-m, --mode` to 'finetune' and if using an `ASTModel`, also specifying which finetuning task to use with `--task`. The options are 'ft_cls' or 'ft_avgtok'. See `_cls(x)` and `_avgtok(x)` in [`ASTModel_finetune`](https://github.com/dwiepert/master_audio/blob/main/master_audio/models/classification/_ast_classification.py) for more information on how merging is done. 
 
-There are a few different parameters to consider. Firstly, the classification head can be altered to use a different amount of dropout and to include/exclude layernorm. See [`BasicClassifier`](TODO) class for more information. 
+There are a few different parameters to consider. Firstly, the classification head can be altered to use a different amount of dropout and to include/exclude layernorm. See [`BasicClassifier`](https://github.com/dwiepert/master_audio/blob/main/master_audio/models/classification/_classification_heads.py) class for more information. 
 
 Default run mode will also freeze the model and only finetune the classification head. This can be altered with `--freeze`. 
 
@@ -174,7 +174,7 @@ We also include the option to use a different hidden state output as the input t
 
 Classification head(s) can be implemented in the following manner:
 1. Specify `--clf_bottleneck` to designate output for initial linear layer 
-2. Give `label_dims` as a list of dimensions or a single int. If given as a list, it will make a number of classifiers equal to the number of dimensions given, with each dimension indicating the output size of the classifier (e.g. [2, 1] will make a classifier with an output of (batch_size, 2) and one with an output of (batch_size, 1). The outputs then need to be stacked by columns to make one combined prediction). In order to do this in [`run_clf.py`](TODO), you must give a label_txt in the following format: split labels with a ',' to specify a group of features to be fed to one classifier; split with a new line '/n' to specify a new classifier. Note that `args.target_labels` should be a flat list of features, but `args.label_groups` should be a list of lists. 
+2. Give `label_dims` as a list of dimensions or a single int. If given as a list, it will make a number of classifiers equal to the number of dimensions given, with each dimension indicating the output size of the classifier (e.g. [2, 1] will make a classifier with an output of (batch_size, 2) and one with an output of (batch_size, 1). The outputs then need to be stacked by columns to make one combined prediction). In order to do this in `run_clf.py`, you must give a label_txt in the following format: split labels with a ',' to specify a group of features to be fed to one classifier; split with a new line '/n' to specify a new classifier. Note that `args.target_labels` should be a flat list of features, but `args.label_groups` should be a list of lists. 
 
 There are data augmentation transforms available for finetuning. 
 
