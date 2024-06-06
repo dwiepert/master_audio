@@ -1,0 +1,8 @@
+
+.DS_Store
+/checkpoints
+environment2.yml
+*.pyc
+naip_asr/vertexai_support/clf_config.json
+/speech
+test.py
