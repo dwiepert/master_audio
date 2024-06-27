@@ -89,9 +89,9 @@ Data augmentation of audio files using audiomentations (https://github.com/iver5
 If working with spectrograms, these are the available transformations:
 * `Wav2Fbank`: Convert from wav to spectrogram. Set `target_length`, `melbins`, `tf_co`, and `tf_shift`. Set in `dataset_config` with `target_length`, `num_mel_bins`, `cdo` (boolean, True to use course dropout), `shift` (boolean, True to do an affine shift)
 * `FbankNoise`: add random noise to a spectrogram. Specify whether to add noise to a `WaveDataset` with `noise` boolean in `dataset_config`.
-* `FreqMaskFbank`: implement frequency masking for SSAST. Set `freqm` in `dataset_config`.
+* `FreqMaskFbank`: implement frequency masking for SSAST. Set `freqm` (max possible length of mask - inds) in `dataset_config`.
 * `NormalizeFbank`: normalize spectrogram. Need to set `norm_mean` (dataset mean) and `norm_std` (dataset standard deviation). These values can be set in `dataset_config` with `dataset_mean` and `dataset_std`
-* `TimeMaskFbank`: implement time masking for SSAST. Set `timem` in `dataset_config`.
+* `TimeMaskFbank`: implement time masking for SSAST. Set `timem` (max possible length of mask - inds) and `timem_p` (probability between 0-1) in `dataset_config`.
 
 ## Datasets
 User defined `WaveDataset` and collate functions to use with torch `DataLoader`. Note that with this dataset, the data is expected to be in the following format: `PATH_TO_INPUT_DIRECTORY/uid/waveform.wav`.

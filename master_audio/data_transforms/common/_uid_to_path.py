@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import Union
 
-from naip_asr.io import download_file_to_local
+from master_audio.io import download_file_to_local
 
 class UidToPath(object):
     """

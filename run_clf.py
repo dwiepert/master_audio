@@ -61,7 +61,7 @@ def _check_args(args):
     
     if args.mode in ['evaluate', 'extract']:
         assert '.csv' in args.data_split_root[-4:], 'Data split root must be a path to a csv if evaluating or extracting.'
-    else:
+    elif args.data_split_root is not None:
         assert '.csv' not in args.data_split_root[-4:], 'Data split root must be a dir if finetuning.'
 
     if args.mode == 'extract':
@@ -232,7 +232,7 @@ def _check_datasplit(args):
 
     # else:
     #     if args.data_split_root is None:
-    #         args.data_split_root = args.output_dir
+    #         args.data_split_root =     args.output_dir
     #         _ = generate_datasplit(args.input_dir, args.data_split_root, args.cloud, 0, 0, args.bucket, args.metadata_csv, args.md_uid_col, args.md_subject_col) #assumes that all values should be in the test.csv
             
     return args 
@@ -241,7 +241,7 @@ def main():
     parser = argparse.ArgumentParser()
     #Inputs
     parser.add_argument('--input_dir', default = '', help='Set path to directory with wav files to process. Can be local directory or google cloud storage bucket.')
-    parser.add_argument("-d", "--data_split_root", default='./speech/w2v2_local/test.csv', help="specify file path where datasplit is located. If you give a full file path to classification, an error will be thrown. On the other hand, evaluation and embedding expects a single .csv file.  If cloud and .csv, use full gs:// path.")
+    parser.add_argument("-d", "--data_split_root", default=None, help="specify file path where datasplit is located. If you give a full file path to classification, an error will be thrown. On the other hand, evaluation and embedding expects a single .csv file.  If cloud and .csv, use full gs:// path.")
     parser.add_argument("--metadata_csv", default='', help="specify if there is a csv matching uids to subjects and including annotation data. If cloud, use full gs:// path. ")
     parser.add_argument("--md_uid_col", default="originalaudioid")
     parser.add_argument("--md_subject_col", default="record")
@@ -256,7 +256,7 @@ def main():
     parser.add_argument('-b','--bucket_name', default='', help="google cloud storage bucket name")
     parser.add_argument('-p','--project_name', default='', help='google cloud platform project name')
     #Mode specifics
-    parser.add_argument("-m", "--mode", choices=['pretrain','finetune','evaluate','extract'], default='evaluate')
+    parser.add_argument("-m", "--mode", choices=['pretrain','finetune','evaluate','extract'], default='finetune')
     parser.add_argument("--weighted", type=ast.literal_eval, default=False, help="specify whether to learn a weighted sum of layers for classification")
     parser.add_argument("--layer", default=-1, type=int, help="specify which hidden state is being used. It can be between -1 and 12")
     parser.add_argument("--freeze", type=ast.literal_eval, default=True, help='specify whether to freeze the base model')
@@ -265,7 +265,7 @@ def main():
     parser.add_argument('--embedding_type', type=str, default='ft', help='specify whether embeddings should be extracted from classification head (ft), base pretrained model (pt), weighted sum (wt),or shared dense layer (st)', choices=['ft','pt', 'wt', 'st', None])
     parser.add_argument("--ssast_task", type=str, default='ft_cls', help="pretraining or fine-tuning task", choices=["ft_avgtok", "ft_cls", "pretrain_mpc", "pretrain_mpg", "pretrain_joint"]) #SSAST specifics
     #Model specifics
-    parser.add_argument("--model_type", default="w2v2", choices=["w2v2","ssast"], help="specify model type")
+    parser.add_argument("--model_type", default="ssast", choices=["w2v2","ssast"], help="specify model type")
     parser.add_argument('--model_size', default='base',help='the size of the model', type=str)
     parser.add_argument("-c", "--checkpoint", default='', help="specify path to pre-trained model weight checkpoint")
     parser.add_argument("-mp", "--finetuned_mdl_path", default="", help='If running eval-only or extraction, you have the option to load a fine-tuned model by specifying the model path')
@@ -314,12 +314,13 @@ def main():
     parser.add_argument("--reverse", default=None, type=float, help="Specify p for Reverse")
     parser.add_argument("--room", default=None, type=float, help="Specify p for RoomSimulator")
     parser.add_argument("--tshift", default=None, type=float, help="Specify p for Shift")
-    parser.add_argument("--mixup", default=0)
+    parser.add_argument("--mixup", default=None)
     #SSAST/Spectrogram specifics
     parser.add_argument("--dataset_mean", default=-4.2677393, type=float, help="the dataset mean, used for input normalization")
     parser.add_argument("--dataset_std", default=4.5689974, type=float, help="the dataset std, used for input normalization")
     parser.add_argument('--freqm', help='frequency mask max length', type=int, default=0)
     parser.add_argument('--timem', help='time mask max length', type=int, default=0)
+    parser.add_argument('--timem_p', help='specify probability for time masking', type=float, default=0)
     parser.add_argument("--noise", type=ast.literal_eval, default=False, help="specify if augment noise in finetuning")
     #Training Parameters
     parser.add_argument("-bs", "--batch_size", type=int, default=1, help="specify batch size")
@@ -428,7 +429,7 @@ def main():
                         'gaint':args.gaint, 'mp3': args.mp3, 'norm': args.norm, 'pshift':args.pshift, 'pinversion':args.pinversion,
                         'tstretch': args.tstretch, 'tmask':args.tmask, 'tanh':args.tanh, 'repeat':args.repeat, 'reverse':args.reverse,
                         'room': args.room, 'tshift':args.tshift, 'mixup':args.mixup, 'dataset_mean':args.dataset_mean, 'dataset_std':args.dataset_std,
-                        'freqm':args.freqm, 'timem':args.timem, 'noise':args.noise}
+                        'freqm':args.freqm, 'timem':args.timem, 'timem_p':args.timem_p, 'noise':args.noise}
     
     train_config = {'batch_size':args.batch_size, 'num_workers':args.num_workers, 'epochs':args.epochs,
                     'optim':args.optim, 'weight_decay':args.weight_decay, 'learning_rate':args.learning_rate,

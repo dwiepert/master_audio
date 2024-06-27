@@ -1,12 +1,13 @@
 import torch
 import torchaudio
+import matplotlib.pyplot as plt
 
 class TimeMaskFbank(object):
     '''
     Time masking
     '''
-    def __init__(self, timem):
-        self.timem = torchaudio.transforms.TimeMasking(timem)
+    def __init__(self, timem, p):
+        self.timem = torchaudio.transforms.TimeMasking(time_mask_param=timem, p=p)
     
     def __call__(self, sample):
         fbank = sample['fbank']

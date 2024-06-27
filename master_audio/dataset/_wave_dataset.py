@@ -116,9 +116,6 @@ class WaveDataset(Dataset):
         self.trim_level = self._check_existence('trim_level')
         self.to_numpy=False
         self.to_tensor = True
-        self.data_augmentation = self._check_existence('data_augmentation')
-        if self.data_augmentation is None:
-            self.data_augmentation = False
         # self.to_spectrogram = self._check_existence('to_spectrogram')
         # if self.to_spectrogram is None:
         #     self.to_spectrogram = False
@@ -149,6 +146,7 @@ class WaveDataset(Dataset):
             self.melbins = self._check_existence('num_mel_bins')
             self.freqm = self._check_existence('freqm') #frequency masking if freqm != 0
             self.timem = self._check_existence('timem') #time masking if timem != 0
+            self.timem_p = self._check_existence('timem_p')
             
             ## dataset spectrogram mean and std, used to normalize the input
             self.norm_mean = self._check_existence('dataset_mean')
@@ -190,6 +188,13 @@ class WaveDataset(Dataset):
         These transformations will always load the audio. 
         :outparam audio_transform: standard transforms
         """
+        al_transform = self._audiomentation_options()
+        if al_transform != []:
+            al_transform = Compose(al_transform)
+            self.data_augmentation = True
+        else:
+            self.data_augmentation = False
+
         waveform_loader = UidToWaveform(prefix = self.prefix, bucket=self.bucket, lib=self.use_librosa)
         transform_list = [waveform_loader]
         if self.monochannel:
@@ -209,28 +214,26 @@ class WaveDataset(Dataset):
         if self.to_tensor:
             tensor_tfm = ToTensor()
             transform_list.append(tensor_tfm)
-        elif self.to_numpy:
+        if self.to_numpy or self.data_augmentation:
             numpy_tfm = ToNumpy()
             transform_list.append(numpy_tfm)
 
-        transform = torchvision.transforms.Compose(transform_list)
-        #transform_list.append(feature_tfm)
-
-        transforms = [transform]
         
-        #audiomentations transforms
-        al_transform = self._audiomentation_options()
-        if al_transform != []:
-            al_transform = Compose(al_transform)
-            
-            transforms.append(al_transform)
-        #pad options
+    
         # if self.clip_length is not None and self.resample_rate is not None:
         #     self.pad_size = self.clip_length*self.resample_rate
         #     pad_tfm = Pad(pad_size=self.pad_size, mode=self.pad_mode, value=self.pad_value)
 
         #     transforms.append(torchvision.transforms.Compose([pad_tfm]))
+        
 
+        transform = torchvision.transforms.Compose(transform_list)
+        #transform_list.append(feature_tfm)
+
+        transforms = [transform]
+
+        if al_transform != []:
+            transforms.append(al_transform)
 
         return transforms
     
@@ -282,8 +285,6 @@ class WaveDataset(Dataset):
 
         return t
 
-            
-    
     def _getspectransforms(self):
         '''
         Use audio configuration parameters to initialize classes for spectrogram transformation. 
@@ -298,7 +299,7 @@ class WaveDataset(Dataset):
             freqm = FreqMaskFbank(self.freqm)
             transform_list.append(freqm)
         if self.timem is not None: 
-            timem = TimeMaskFbank(self.timem)
+            timem = TimeMaskFbank(self.timem, self.timem_p)
             transform_list.append(timem)
         norm = NormalizeFbank(self.norm_mean, self.norm_std)
         transform_list.append(norm)
@@ -308,10 +309,6 @@ class WaveDataset(Dataset):
             transform_list.append(noise)
         transform = torchvision.transforms.Compose(transform_list)
         return transform
-    
-    
-
-
 
     def __getitem__(self, idx):
         '''
@@ -353,8 +350,9 @@ class WaveDataset(Dataset):
         sample = self.transforms[0](sample)
 
         if self.data_augmentation and self.transforms[1] != []:
-            sample = self.transforms[1](samples=sample, sample_rate = sample['sample_rate']) #audio augmentations
-        
+            sample['waveform'] = self.transforms[1](samples=sample['waveform'], sample_rate = sample['sample_rate']) #audio augmentations
+            if not self.to_numpy:
+                sample['waveform'] = torch.from_numpy(sample['waveform']).type(torch.float32)
 
         #TODO: initialize mixup
         if self.mixup is not None:
@@ -388,7 +386,6 @@ class WaveDataset(Dataset):
         
         return sample
     
-
     def __len__(self):
         return len(self.data)
     

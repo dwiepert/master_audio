@@ -126,8 +126,8 @@ class ClassificationWrapper():
         del self.data_config['val_size']
         del self.data_config['target_labels']
 
-        self.eval_data_config = self.data_config
-        self.train_data_config = self.data_config
+        self.eval_data_config = self.data_config.copy()
+        self.train_data_config = self.data_config.copy()
 
         # remove data augmentation from eval data config
         set_none = ['gauss', 'gausssnr', 'alias', 'bandstop', 'bitcrush', 'gain', 'gaint', 'mp3', 'norm', 'pshift', 'pinversion', 'tstretch', 'tmask', 'tanh', 'repeat', 'reverse', 'room', 'tshift', 'freqm', 'timem', 'noise']
@@ -170,7 +170,7 @@ class ClassificationWrapper():
         """
         #set seed
         if self.model_seed is not None:
-            torch.manual_seed=self.model_configseed
+            torch.manual_seed=self.model_seed
             if torch.cuda.is_available(): torch.cuda.manual_seed_all(self.model_seed)
 
         if self.model_type == 'w2v2':
@@ -181,7 +181,9 @@ class ClassificationWrapper():
                 else:
                     trunc = False
 
-                self.data_config['feature_extractor'] = W2V2FeatureExtractor(self.checkpoint, clip_length, truncation=trunc, padding=self.padding)
+                ftextract = W2V2FeatureExtractor(checkpoint=self.checkpoint, max_length=clip_length, truncation=trunc, padding=self.padding)
+                self.train_data_config['feature_extractor'] = ftextract
+                self.eval_data_config['feature_extractor'] = ftextract
 
             self.model = W2V2ForClassification(checkpoint = self.checkpoint, label_dim=self.n_class, pooling_mode=self.pooling_mode,
                                                freeze=self.freeze, weighted=self.weighted, layer=self.layer,  shared_dense=self.shared_dense,
@@ -242,11 +244,11 @@ class ClassificationWrapper():
         
         #set up datasets
         if self.mode in ['pretrain', 'finetune']:
-            train_dataset = WaveDataset(train_df, self.input_dir, self.model_type, 'classification', self.train_data_config, self.target_labels, self.bucket)
-            val_dataset = WaveDataset(val_df, self.input_dir, self.model_type, 'classification', self.eval_data_config, self.target_labels, self.bucket)
+            train_dataset = WaveDataset(data=train_df, prefix=self.input_dir, model_type=self.model_type, model_task ='classification', dataset_config=self.train_data_config, target_labels=self.target_labels, bucket=self.bucket)
+            val_dataset = WaveDataset(data=val_df, prefix=self.input_dir, model_type=self.model_type, model_task ='classification', dataset_config=self.eval_data_config, target_labels=self.target_labels, bucket=self.bucket)
             self.train_loader = DataLoader(train_dataset, batch_size = self.batch_size, shuffle=True, num_workers = self.num_workers, collate_fn=collate_clf)
             self.val_loader = DataLoader(val_dataset, batch_size = self.batch_size, shuffle=False, num_workers = self.num_workers, collate_fn=collate_clf)
-        eval_dataset = WaveDataset(test_df, self.input_dir, self.model_type, 'classification', self.eval_data_config, self.target_labels, self.bucket)
+        eval_dataset = WaveDataset(data=test_df, prefix=self.input_dir, model_type=self.model_type, model_task ='classification', dataset_config=self.eval_data_config, target_labels=self.target_labels, bucket=self.bucket)
         self.eval_loader = DataLoader(eval_dataset, batch_size = self.batch_size, shuffle=False, num_workers = self.num_workers, collate_fn=collate_clf)
 
     def __call__(self):

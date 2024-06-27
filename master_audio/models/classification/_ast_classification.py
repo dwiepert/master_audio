@@ -28,8 +28,6 @@ import timm
 import torch.nn as nn
 import torch
 
-
-from matplotlib import pyplot as plt
 from timm.models.layers import trunc_normal_, to_2tuple
 
 #local

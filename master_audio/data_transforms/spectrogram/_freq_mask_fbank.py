@@ -1,6 +1,6 @@
 import torch
 import torchaudio
-
+import matplotlib.pyplot as plt
 
 
 class FreqMaskFbank(object):
@@ -8,11 +8,12 @@ class FreqMaskFbank(object):
     Frequency masking
     '''
     def __init__(self, freqm):
-        self.freqm = torchaudio.transforms.FrequencyMasking(freqm)
+        self.freqm = torchaudio.transforms.FrequencyMasking(freq_mask_param=freqm)
     
     def __call__(self, sample):
         fbank = sample['fbank']
         fbank = torch.transpose(fbank, 0, 1)
+        #plt.pcolormesh(fbank)
         # this is just to satisfy new torchaudio version.
         fbank = fbank.unsqueeze(0)
 

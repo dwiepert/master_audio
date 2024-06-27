@@ -1,4 +1,4 @@
-from naip_asr.io import load_waveform_from_gcs, load_waveform_from_local
+from master_audio.io import load_waveform_from_gcs, load_waveform_from_local
 class UidToWaveform(object):
     '''
     Take a UID, find & load the data, add waveform and sample rate to sample

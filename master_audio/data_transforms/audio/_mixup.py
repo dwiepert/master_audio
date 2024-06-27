@@ -37,3 +37,5 @@ class Mixup(object):
             #TODO: what is happening here
 
         sample['waveform'] = waveform
+
+        return sample
