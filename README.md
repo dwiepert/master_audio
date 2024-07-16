@@ -18,7 +18,11 @@ There are a handful of ways to specify and work with checkpoints
 2. All models can be given a local directory or file with the pretrained model. This package includes a few ways to download these models to the local directory.
    - Whisper: For local checkpoints, you must download a `.pt` file. These checkpoints can be downloaded using `download_checkpoint_from_url`. If a downloaded model is saved on google cloud storage for space saving, it can also be downloaded using `download_checkpoint_from_gcs`. When giving a local checkpoint to the model, it must be given as the full file path to the `.pt` file (e.g. `local_dir_path\medium.pt`)
    - W2V2: For local checkpoints, you must download the entire checkpoint directory from hugging face using `download_checkpoint_from_hf`. Otherwise, if the directory is saved to the cloud, it can also be downloaded using `download_checkpoint_from_gcs`. Note that `download_checkpoint_from_hf` has pre-built options that can be downloaded ("base", "large", "large-robust", "large-self"), or you can give a `repo_id` and other identifying informationto download checkpoints outside of the pre-built options. The `repo_id` must be from [huggingface.co](https://huggingface.co). When giving a local checkpoint to the model, it must be given as the full path to a downloaded checkpoint directory (e.g. `local_dir_path\w2v2-base-960h`)
-   
+   - SSAST: For local checkpoints, you must download a `.pth` file. You can do so from the [SSAST GitHub](https://github.com/YuanGongND/ssast?tab=readme-ov-file#pretrained-models), or using `download_checkpoint_from_url` and specifying 'ssast' as `model_type` and either 'frame' or 'patch' as `model_size`.
+   - fastText: For local checkpoints, you will download a `.zip` file from the [fastText docs](https://fasttext.cc/docs/en/english-vectors.html). This can also be downloaded with `download_checkpoint_from_url` and specifying 'fasttext' as `model_type`, and one of '1M', '1M-subwords', '2M', '2M-subwords' as `model_size`
+   - Word2Vec: Word2Vec is a little tricky and has to be downloaded from a [tutorial with the google drive link](https://mccormickml.com/2016/04/12/googles-pretrained-word2vec-model-in-python/) or [kaggle](https://www.kaggle.com/datasets/umbertogriffo/googles-trained-word2vec-model-in-python). This should be a `.bin` file. 
+   - WordNet does not need a checkpoint as it is built into the package.
+
 #### Using download functions
 `download_checkpoint_from_hf` takes the following parameters:
 - checkpoint: str, Path, directory where the checkpoint file(s) should be saved. Must be full file path to where to SAVE the checkpoint (e.g., `local_dir_path/checkpoint_name`). 
@@ -199,3 +203,6 @@ You must also consider where you want the embeddings to be extracted from. The o
 
 Brief note on target labels:
 Embedding extraction is the only mode where target labels are not required. You can give a csv with only uid names  it will still function and extract embeddings.
+
+## Calculating word similarity
+You can initialize and run `get_similarity_matrix(transcription)` to get a similarity matrix of all words in a transcription. For an example of calculating word similarity on a structured dataset, see `run_word_sim.py`[TODO]. This uses the base ASR dataset with `load_waveform` as False, so that the dataset only loads metadata (where transcriptions should be stored after `run_ASR.py`). 

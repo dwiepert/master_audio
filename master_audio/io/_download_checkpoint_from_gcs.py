@@ -20,8 +20,11 @@ def download_checkpoint_from_gcs(checkpoint_prefix: Union[str, Path], local_path
     checkpoint_prefix = Path(checkpoint_prefix)
     local_path = Path(local_path).absolute()
 
-    if not local_path.exists():
+    if local_path.is_dir() and not local_path.exists():
         os.makedirs(local_path)
+   #else:
+    #    if local_path.parents[0].is_dir() and not local_path.parents[0].exists():
+     #       os.makedirs(local_path.parents[0])
 
     blobs = bucket.list_blobs(prefix=str(checkpoint_prefix))
     for b in blobs:

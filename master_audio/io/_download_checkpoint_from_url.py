@@ -39,6 +39,11 @@ def download_checkpoint_from_url(checkpoint: str, model_size: str, model_type:st
     if model_type == 'whisper':
         assert '.pt' in checkpoint, 'download target must be a .pt file'
         url = _WHISPER_MODELS_URL[model_size]
+    elif model_type == 'ssast':
+        assert '.pth' in checkpoint, 'download target must be a .pth file'
+        url = _SSAST_MODELS_URL[model_size]
+    elif model_type == 'fasttext':
+        url = _FASTTEXT_MODELS_URL[model_size]
     else:
         raise ValueError('Can only download whisper models with this method')
     

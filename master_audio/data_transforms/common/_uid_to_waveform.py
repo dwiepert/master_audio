@@ -1,4 +1,4 @@
-from master_audio.io import load_waveform_from_gcs, load_waveform_from_local
+from master_audio.io import load_waveform_from_gcs, load_waveform_from_local, load_metadata_from_gcs, load_metadata_from_local
 class UidToWaveform(object):
     '''
     Take a UID, find & load the data, add waveform and sample rate to sample
@@ -15,20 +15,28 @@ class UidToWaveform(object):
     def __call__(self, sample):
         
         uid, targets = sample['uid'], sample['targets']
-        
+        cache = {}
         if uid not in self.cache:
             if self.bucket is not None:
                 #load from google cloud storage
-                self.cache[uid] = load_waveform_from_gcs(self.bucket, self.prefix, uid, self.extension, self.lib)
+                wav, sr = load_waveform_from_gcs(self.bucket, self.prefix, uid, self.extension, self.lib)
+                cache['waveform'] = wav 
+                cache['sample_rate'] = sr
+                cache['metadata'] = load_metadata_from_gcs(self.bucket, self.prefix, uid, 'json')
+                self.cache[uid] = cache
             else:
                  #load local
-                 self.cache[uid] = load_waveform_from_local(self.prefix, uid, self.extension, self.lib)
-
+                wav, sr = load_waveform_from_local(self.prefix, uid, self.extension, self.lib)
+                cache['waveform'] = wav
+                cache['sample_rate'] = sr
+                cache['metadata'] = load_metadata_from_local(self.prefix, uid, 'json')
+                self.cache[uid] = cache
             
-        waveform, sample_rate = self.cache[uid]
+        cache = self.cache[uid]
         
-        sample['waveform'] = waveform
-        sample['sample_rate'] = sample_rate
+        sample['waveform'] = cache['waveform']
+        sample['sample_rate'] = cache['sample_rate']
+        sample['metadata'] = cache['metadata']
          
         return sample
     

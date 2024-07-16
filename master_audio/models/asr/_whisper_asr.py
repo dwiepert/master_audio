@@ -1,7 +1,7 @@
 """
 Set up Whisper
 
-Last modified: 05/2024
+Last modified: 07/2024
 Author(s): Daniela Wiepert
 
 Sources: 
@@ -84,7 +84,10 @@ class WhisperForASR:
         source: https://github.com/linto-ai/whisper-timestamped
 
         """
-        timestamps = result["segments"][0]["words"]
+        segments = result["segments"]
+        if segments == []:
+            return []
+        timestamps = segments[0]["words"]
         for i in range(len(timestamps)):
             t = timestamps[i]
             text = t['text']

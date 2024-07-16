@@ -5,7 +5,9 @@ def collate_asr(batch):
     """
     #options are [uid]
     uid = [item['uid'] for item in batch]
-    out_batch = {'uid':uid}
+    metadata = [item['metadata'] for item in batch]
+    out_batch = {'uid':uid, 'metadata':metadata}
+
 
     if 'sample_rate' in batch[0]:
         sr = [item['sample_rate'] for item in batch]

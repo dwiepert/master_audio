@@ -20,7 +20,7 @@ def download_checkpoint_from_hf(checkpoint: Union[str, Path],  model_type: str =
 
     :param checkpoint: str, Path, directory where the checkpoint file(s) should be saved. Must be full file path to where to save checkpoint
     :param model_size: str, size of the model to download (e.g., large, small, tiny, tiny.en)
-    :param model_type: str, specify model type (e.g. whisper, nemo)
+    :param model_type: str, specify model type (e.g. whisper)
     :param repo_id: str, repo_id in hugging face
     :param filename: optional filename if downloading a single file instead of directory
     :param subfolder: str, optional, specify if there is a file in a subdirectory of the hugging face repo
@@ -30,7 +30,7 @@ def download_checkpoint_from_hf(checkpoint: Union[str, Path],  model_type: str =
     if not checkpoint.exists():
         os.makedirs(checkpoint) 
     
-    if model_type == 'whisper':
+    if model_type == 'whisper' or model_type=='ssast':
         raise NotImplementedError
         # assert model_size in _WHISPER_MODELS,  f'model_size {model_size} not implemented for Whisper.'
         # repo_id = _WHISPER_MODELS[model_size]

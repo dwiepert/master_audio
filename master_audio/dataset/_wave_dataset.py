@@ -48,20 +48,19 @@ class WaveDataset(Dataset):
             self.use_librosa = False
 
         self.mixup = self._check_existence('mixup')
-        
-        #FOR EACH TYPE OF MODEL
-        if self.model_type == 'ssast':
-            self.to_spectrogram = True
-        elif self.model_type=='w2v2':
-            self.to_spectrogram = False 
-        else:
-            raise NotImplementedError()
-        
+         
 
         if self.model_task == 'asr':
             self.transforms = self._get_asr_transforms()
         
         if self.model_task == 'classification':
+            if self.model_type == 'ssast':
+                self.to_spectrogram = True
+            elif self.model_type=='w2v2':
+                self.to_spectrogram = False 
+            else:
+                raise NotImplementedError()
+        
             assert self.target_labels is not None, 'Target labels must be given for classification.'
             assert isinstance(self.data, pd.DataFrame), 'Must give a dataframe of uids and annotations for classification.'
             self.transforms = self._get_clf_transforms()

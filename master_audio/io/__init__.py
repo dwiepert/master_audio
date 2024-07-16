@@ -7,7 +7,8 @@ from ._download_file_to_local import download_file_to_local
 from ._upload_to_gcs import upload_to_gcs
 from ._search_gcs import search_gcs
 from ._load_input_data import load_input_data
-
+from ._load_metadata_from_gcs import load_metadata_from_gcs
+from ._load_metadata_from_local import load_metadata_from_local
 __all__ = [
     'download_checkpoint_from_url'
     'download_checkpoint_from_gcs',
@@ -17,5 +18,7 @@ __all__ = [
     'download_file_to_local',
     'upload_to_gcs',
     'search_gcs', 
-    'load_input_data'
+    'load_input_data',
+    'load_metadata_from_gcs',
+    'load_metadata_from_local'
 ]
