@@ -8,3 +8,4 @@ __version__ = '0.1.0'
 # 0.0.4: download checkpoints from GCP added
 # 0.0.5: download checkpoints from hugging face for w2v2
 # 0.1.0: classification models added
+# 0.2.0: word vector similarity addede

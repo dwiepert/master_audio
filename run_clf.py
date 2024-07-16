@@ -249,10 +249,10 @@ def main():
     parser.add_argument('-l','--label_txt', default='./labels_1clf.txt') #default=None #default='./labels.txt'
     #Outputs
     parser.add_argument("--save_logs", default=True, type=ast.literal_eval, help="Specify whether to save outputs.")
-    parser.add_argument("--output_dir", default= './speech/ssast_local', help='Set path to directory where outputs should be saved.')
+    parser.add_argument("--output_dir", default= '', help='Set path to directory where outputs should be saved.')
     #GCS
     parser.add_argument("--cloud",  nargs="+", type=ast.literal_eval, default=[False, False, False, False, False, False], help="Specify which files are located on the cloud/should be located on the cloud [input_dir, label_txt, output_dir, checkpoint, finetuned_mdl_path, data_split_root]")
-    parser.add_argument("--local_dir", default='speech/datasets/test_asr/', help="Specify location to save files downloaded from bucket")
+    parser.add_argument("--local_dir", default='', help="Specify location to save files downloaded from bucket")
     parser.add_argument('-b','--bucket_name', default='', help="google cloud storage bucket name")
     parser.add_argument('-p','--project_name', default='', help='google cloud platform project name')
     #Mode specifics

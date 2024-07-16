@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from typing import Union
+from tempfile import TemporaryDirectory
 
 from master_audio.io import download_file_to_local, load_metadata_from_gcs, load_metadata_from_local
 
@@ -35,9 +36,12 @@ class UidToPath(object):
                 self.cache[uid] = cache
         
             else:
-                save_path = self.savedir /uid
-                save_path = save_path / 'waveform.wav'
-                cache['waveform'] = download_file_to_local(temp_wav_path, save_path, self.bucket)
+
+                with TemporaryDirectory() as tempdir:
+                    save_path = Path(tempdir) /uid
+                    save_path = save_path / 'waveform.wav'
+                    cache['waveform'] = download_file_to_local(temp_wav_path, save_path, self.bucket)
+                
                 cache['metadata'] = load_metadata_from_gcs(self.bucket, self.prefix, uid, 'json')
                 self.cache[uid] = cache
 
