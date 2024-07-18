@@ -1,5 +1,5 @@
-# ASR Model implementations for NAIP
-Includes a handful of model types implemented to get transcriptions (for single audio files - batches not yet implemented), timestamps, and find pauses over a certain duration. Also contains simple metrics like WER/CER
+# Ready to run Audio tasks for NAIP
+This is a package that includes a number of functions to help you run audio tasks such as ASR, pathological feature classification, and word similarity. Ready to use run functions are also available for each of the tasks. If using the run functions, it will generally expect that you have access to a structured NAIP dataset where each uid has its own folder with a `waveform.wav` file and `metadata.json` file. The exception is ASR which will allow you to generate transcriptions for a folder of `.wav` files. 
 
 ## Installation
 To intall master_audio, follow the instructions below
