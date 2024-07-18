@@ -102,4 +102,4 @@ dependencies:
       - urllib3==2.2.2
       - whisper-timestamped==1.15.4
       - wrapt==1.16.0
-prefix: /Users/m144443/miniconda3/envs/master_audio
+
