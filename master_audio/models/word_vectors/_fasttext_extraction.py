@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Union
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+from numpy.linalg import norm
 
 class FastText:
     """
@@ -17,43 +18,47 @@ class FastText:
         :param checkpoint: str, checkpoint for a trained model
         
         """
-        self._checkpoint = checkpoint
+        self._checkpoint = str(checkpoint)
+        assert '.bin' in self._checkpoint, 'Must give a .bin file to load fasttext'
         self.model_type = model_type
+
         self.model = fasttext.load_model(self._checkpoint)
 
     def extract(self, transcription:str):
         """
         """
-        #PREPROCESS TRANSCRIPTION? 
-        #TODO
 
         words = transcription.split(" ") 
-        vectors = []
-        for w in words:
+        vectors = None
+        for i in range(len(words)):
+            w = words[i]
             if w in self.model:
-                vectors.append(self.model[w])
+               temp = self.model[w].reshape(-1,1)
             else:
-                vectors.append(None)
+                temp = np.empty((300,1))
+                temp[:,:] = np.nan
+            
+            if vectors is None:
+                vectors = temp
+            else:
+                vectors = np.concatenate((vectors, temp), axis=1)
 
-        v_df = pd.DataFrame({'word':words, 'vector':vectors})
-        
-        return v_df
+        return words, vectors
     
     def get_similarity_matrix(self, transcription:str):
-        v_df = self.extract(transcription)
-
-        vectors = v_df['vectors'].to_list()
-
-        tl = len(vectors)
+        words, vectors = self.extract(transcription)
+        tl = len(words)
         sim_matrix = np.empty((tl,tl))
+        temp = np.empty((300,1))
+        temp[:,:] = np.nan
 
         for i in range(tl):
             for j in range(tl):
-                w1 = vectors[i]
-                w2 = vectors[j]
-                if w1 is None or w2 is None:
+                w1 = vectors[:,i]
+                w2 = vectors[:,j]
+                if (w1 == temp).all() or (w2 == temp).all():
                     sim_matrix[i,j] = np.nan
                 else:
-                    sim_matrix[i,j] = cosine_similarity(w1,w2)
+                    sim_matrix[i,j] = np.dot(w1,w2)/(norm(w1)*norm(w2))
         
-        return v_df['word'].to_list(), sim_matrix
+        return words, sim_matrix

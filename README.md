@@ -19,9 +19,9 @@ There are a handful of ways to specify and work with checkpoints
    - Whisper: For local checkpoints, you must download a `.pt` file. These checkpoints can be downloaded using `download_checkpoint_from_url`. If a downloaded model is saved on google cloud storage for space saving, it can also be downloaded using `download_checkpoint_from_gcs`. When giving a local checkpoint to the model, it must be given as the full file path to the `.pt` file (e.g. `local_dir_path\medium.pt`)
    - W2V2: For local checkpoints, you must download the entire checkpoint directory from hugging face using `download_checkpoint_from_hf`. Otherwise, if the directory is saved to the cloud, it can also be downloaded using `download_checkpoint_from_gcs`. Note that `download_checkpoint_from_hf` has pre-built options that can be downloaded ("base", "large", "large-robust", "large-self"), or you can give a `repo_id` and other identifying informationto download checkpoints outside of the pre-built options. The `repo_id` must be from [huggingface.co](https://huggingface.co). When giving a local checkpoint to the model, it must be given as the full path to a downloaded checkpoint directory (e.g. `local_dir_path\w2v2-base-960h`)
    - SSAST: For local checkpoints, you must download a `.pth` file. You can do so from the [SSAST GitHub](https://github.com/YuanGongND/ssast?tab=readme-ov-file#pretrained-models), or using `download_checkpoint_from_url` and specifying 'ssast' as `model_type` and either 'frame' or 'patch' as `model_size`.
-   - fastText: For local checkpoints, you will download a `.zip` file from the [fastText docs](https://fasttext.cc/docs/en/english-vectors.html). This can also be downloaded with `download_checkpoint_from_url` and specifying 'fasttext' as `model_type`, and one of '1M', '1M-subwords', '2M', '2M-subwords' as `model_size`
+   - fastText: For local checkpoints, you will download a `.bin` file from the [fastText docs](https://fasttext.cc/docs/en/crawl-vectors.html). You can download for a variety of languages, but we use English. This can also be downloaded with `download_checkpoint_from_url` and specifying 'fasttext' as `model_type`, and 'en' as `model_size`
    - Word2Vec: Word2Vec is a little tricky and has to be downloaded from a [tutorial with the google drive link](https://mccormickml.com/2016/04/12/googles-pretrained-word2vec-model-in-python/) or [kaggle](https://www.kaggle.com/datasets/umbertogriffo/googles-trained-word2vec-model-in-python). This should be a `.bin` file. 
-   - WordNet does not need a checkpoint as it is built into the package.
+   - WordNet has to be downloaded by downloading all of nltk. See [nltk installation](https://www.nltk.org/data.html) for various methods. I had to download manually, BUT if you download manually you only need to download wordnet from the [nltk_data](https://www.nltk.org/nltk_data/) page. For original wordnet, download 110 and if downloaded manually, move to the 'corpora' folder of nltk_data. If you wanted to try another wordnet, you will need to download the others, and then change the code to import that version of wordnet instead. The manual download can be done with `download_checkpoint_from_url` and specifying 'wordnet' as `model_type` and `model_size`
 
 #### Using download functions
 `download_checkpoint_from_hf` takes the following parameters:
@@ -118,6 +118,18 @@ Rather than use default collate function, use one of the following when initiali
 See examples of using ASR model in [run_asr.py](https://github.com/dwiepert/master_audio/blob/main/run_asr.py).
 Please note that Whisper models take a longer time to transcribe an audio file depending on the length of the file as it was originally built to only handle 30s clips.
 
+If not running with a dataset, set `--rundataset` to false. 
+
+The main arguments to change are:
+* `--input_dir` and `--output_dir`, either local or GCS. Generally, if working with a dataset they would be the same directory.
+* `--tasks`, to set which speech tasks to transcribe. We skip AMR/SMR/Vowel Prolongation as default. 
+* `--model_type`, `--model_size`, and `--checkpoint`. `--model_type` should be one of 'whisper' or 'w2v2'. The `model_size` is only for naming conventions in this code, but for all download functions, it is the key for the models to download (see [`_constants.py`](https://github.com/dwiepert/master_audio/blob/main/master_audio/constants/_constants.py)). The `--checkpoint` should be a full file path either locally or in GCS to a directory/file containing a pretrained model.
+* If using GCS, don't forget to set `--cloud` to True for whichever items are stored in the cloud and give the `--bucket_name`, `--project_name`, and a `--local_dir`. 
+
+All other arguments have defaults that don't need to be changed, but you can if you want to. Notably, you may want to change `--pause_s`, the threshold time for a pause to be considered a long pause in seconds. You could also change parameters for preprocessing the audio or choosing to load audio as a waveform rather than keeping it as a path (only compatible with `wav2vec2`).
+
+By default this will save a json with the transcriptions to the output directory, but if running for a dataset, it will also save the transcription in the individual metadata.json
+
 ### Models and functionality
 Teo types of models are available to use: Whisper, W2V2. Note that whisper does NOT allow non-words while W2V2 does.
 
@@ -205,4 +217,15 @@ Brief note on target labels:
 Embedding extraction is the only mode where target labels are not required. You can give a csv with only uid names  it will still function and extract embeddings.
 
 ## Calculating word similarity
-You can initialize and run `get_similarity_matrix(transcription)` to get a similarity matrix of all words in a transcription. For an example of calculating word similarity on a structured dataset, see `run_word_sim.py`[TODO]. This uses the base ASR dataset with `load_waveform` as False, so that the dataset only loads metadata (where transcriptions should be stored after `run_ASR.py`). 
+You can initialize and run `get_similarity_matrix(transcription)` for `FastText`, `Word2Vec`, and `WordNet` models to get a similarity matrix of all words in a single transcription. For an example of calculating word similarity on a structured dataset, see [`run_word_sim.py`](https://github.com/dwiepert/master_audio/blob/main/). This uses the base ASR dataset with `load_waveform` as False, so that the dataset only loads metadata (where transcriptions should be stored after `run_ASR.py`). 
+
+To calculate word similarty with this code, you must specify the following:
+* `--input_dir` and `--output_dir`, either local or GCS. Generally, if working with a dataset they would be the same directory.
+* `--tasks`, to set which speech tasks to transcribe. We skip AMR/SMR/Vowel Prolongation as default. 
+* `--transcription_type`, to choose which transcription to calculate similarity for. Choose based on naming conventions from ASR database runs. 
+* `--model_type`and `--checkpoint`. `--model_type` should be one of 'fasttext', 'wordnet', or 'word2vec'. The `--checkpoint` should be a full file path either locally or in GCS to a directory/file containing a pretrained model.
+* If using GCS, don't forget to set `--cloud` to True for whichever items are stored in the cloud and give the `--bucket_name`, `--project_name`, and a `--local_dir`. 
+
+
+By default, this will save the output as a json in the ouput directory. The results have the following format:
+{uid: {'transcription': Str, 'words': List[str], 'similarity':Matrix}}

@@ -44,6 +44,8 @@ def download_checkpoint_from_url(checkpoint: str, model_size: str, model_type:st
         url = _SSAST_MODELS_URL[model_size]
     elif model_type == 'fasttext':
         url = _FASTTEXT_MODELS_URL[model_size]
+    elif model_type == 'wordnet':
+        url = _WORDNET_MODELS_URL[model_size]
     else:
         raise ValueError('Can only download whisper models with this method')
     

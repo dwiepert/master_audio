@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import json
 import glob
+import shutil
 import tempfile
 from typing import Union
 from google.cloud import storage
@@ -76,7 +77,6 @@ def run(args):
         r = model.transcribe(d, return_timestamps=args.return_timestamps, return_pauses=args.return_pauses, pause_s=args.pause_s)
         r['pause_s'] = args.pause_s
         results[d] = r
-    
     return results
 
 def run_with_dataset(args):
@@ -118,13 +118,19 @@ def run_with_dataset(args):
         transcription_name = args.model_type+'_'+args.model_size+'_transcription'
         metadata = batch['metadata'][0]
         uid = batch['uid'][0]
+        audio = batch['waveform'][0] #NOTE THAT WITH THE DATASET, THE AUDIO DATA, WHETHER LOADED OR A PATH, IS ALWAYS UNDER 'waveform'
+
         if metadata['task'] not in args.tasks:
-           continue 
+            if args.load_waveform is False and args.bucket is not None:
+                shutil.rmtree(os.path.dirname(audio))
+            continue 
 
         if transcription_name in metadata and not args.override:
             results[uid] = metadata[transcription_name]
+            if args.load_waveform is False and args.bucket is not None:
+                shutil.rmtree(os.path.dirname(audio))
             continue
-        audio = batch['waveform'][0] #NOTE THAT WITH THE DATASET, THE AUDIO DATA, WHETHER LOADED OR A PATH, IS ALWAYS UNDER 'waveform'
+        
         if 'sample_rate' in batch:
             sample_rate = int(batch['sample_rate'][0])
         else:
@@ -135,6 +141,8 @@ def run_with_dataset(args):
         results[uid] = r
         update_metadata(metadata = metadata, prefix = args.input_dir / uid, results = r, transcription_name = transcription_name, cloud = args.cloud['input'], bucket=args.bucket)
 
+        if args.load_waveform is False and args.bucket is not None:
+            shutil.rmtree(os.path.dirname(audio))
     return results
 
 def main():
@@ -143,7 +151,7 @@ def main():
     parser.add_argument("--save_outputs", default=True, type=ast.literal_eval, help="Specify whether to save outputs.")
     parser.add_argument("--output_dir", default= '', help='Set path to directory where outputs should be saved.')
     parser.add_argument("--override", default=False, type=ast.literal_eval, help='specify whether to rerun and overwrite currently existing transcription')
-    parser.add_argument("--tasks", nargs="+", default=['Sentence Repetition', 'Word Repetition: Catapult', 'Word Repetition: Catastrophe'], help = 'specify which tasks to get transcriptions for.')
+    parser.add_argument("--tasks", nargs="+", default=['Sentence Repetition', 'Word Repetition: Catapult', 'Word Repetition: Catastrophe', 'Animal Fluency', 'Counting', 'Picture Description', 'Reading', 'Word Repetition: Catastrophe Slow', 'Word Repetition: Catastrophe Fast'], help = 'specify which tasks to get transcriptions for.')
     #run methods
     parser.add_argument("--rundataset",default=True, help="Specify whether to run using torch Dataset. If false, defaults to regular for loop/lists and only uses audio paths (does not load outside of model)." )
     #model specifics
@@ -161,7 +169,7 @@ def main():
     parser.add_argument("--clip_length", default=None, type=int, help="Choose whether to truncate audio. Not required for ASR.")
     parser.add_argument("--trim_db", default=60, type=float, help="specify db threshold for trimming beginning/end silence.")
     #GCS
-    parser.add_argument("--cloud",  nargs="+", type=ast.literal_eval, default=[False,False, False], help="Specify which files are located on the cloud/should be located on the cloud [input_dir, output_dir, checkpoint]")
+    parser.add_argument("--cloud",  nargs="+", type=ast.literal_eval, default=[False, False, False], help="Specify which files are located on the cloud/should be located on the cloud [input_dir, output_dir, checkpoint]")
     parser.add_argument("--local_dir", default='', help="Specify location to save files downloaded from bucket")
     parser.add_argument('-b','--bucket_name', default='', help="google cloud storage bucket name")
     parser.add_argument('-p','--project_name', default='', help='google cloud platform project name')

@@ -37,8 +37,7 @@ def run(args):
     """
     """
    #(1) Make dataset
-    dataset_config = {'use_librosa': True, 'load_waveform': args.load_waveform, 'resample_rate': args.resample_rate, 'monochannel': args.monochannel, 'clip_length':args.clip_length,
-                      'trim_db':args.trim_db}
+    dataset_config = {}
     if any(list(args.cloud.values())):
         data = search_gcs('waveform.wav', args.input_dir, args.bucket)
         dataset_config['savedir'] = args.local_dir
@@ -53,7 +52,7 @@ def run(args):
     #data = [] #get np array of uids in the input directory
     #also try with dataframe
     dataset = WaveDataset(data = data, prefix=args.input_dir,  model_type=args.model_type,
-                             model_task='asr', dataset_config=dataset_config, target_labels=None, bucket=args.bucket)
+                             model_task='similarity', dataset_config=dataset_config, target_labels=None, bucket=args.bucket)
 
     #Batchsize should ALWAYS BE 1 For ASR dataset
     dataloader = DataLoader(dataset, collate_fn=collate_asr, batch_size = 1)
@@ -72,14 +71,18 @@ def run(args):
     results = {}
     for batch in tqdm(dataloader):
         metadata = batch['metadata'][0]
-        if metadata['task'] in args.tasks:
+        if metadata['task'] not in args.tasks or args.transcription_type not in metadata:
             continue
         uid = batch['uid'][0]
-        transcription = metadata[args.transcription_type]['transcription']
+        transcription = metadata[args.transcription_type]['transcription'][0]
         
-        sim_matrix = model.get_similarity_matrix(transcription).tolist()
+        words, sim_matrix = model.get_similarity_matrix(transcription)
         
-        results[uid] = {'transcription': transcription, 'similarity': sim_matrix}
+        #df = pd.DataFrame(sim_matrix)
+        #df.set_index(words)
+        #df = df.columns(words)
+        
+        results[uid] = {'transcription': transcription, 'words': words, 'similarity': sim_matrix.tolist()}
 
     return results
 
@@ -90,9 +93,9 @@ def main():
     parser.add_argument("--output_dir", default= '', help='Set path to directory where outputs should be saved.')
     parser.add_argument("--tasks", nargs="+", default=['Animal Fluency'], help = 'specify which tasks to get transcriptions for.')
     #model specifics
-    parser.add_argument("--model_type", default='whisper', choices = ['fasttext', 'wordnet', 'word2vec'], help='Specify model to use.')
+    parser.add_argument("--model_type", default='fasttext', choices = ['fasttext', 'wordnet', 'word2vec'], help='Specify model to use.')
     parser.add_argument("--checkpoint", default = 'medium.pt', help='Specify model checkpoint')
-    parser.add_argument("--transcription_type", default='w2v2_base', help='Specify what transcription to load from metadata.')
+    parser.add_argument("--transcription_type", default='whisper_base_transcription', help='Specify what transcription to load from metadata.')
     #GCS
     parser.add_argument("--cloud",  nargs="+", type=ast.literal_eval, default=[False,False, False], help="Specify which files are located on the cloud/should be located on the cloud [input_dir, output_dir, checkpoint]")
     parser.add_argument("--local_dir", default='', help="Specify location to save files downloaded from bucket")
@@ -138,3 +141,6 @@ def main():
 
     if args.save_outputs:
         save_results(results, args.output_dir,model_name = args.model_type, bucket=args.bucket)
+
+if __name__ == "__main__":
+    main()

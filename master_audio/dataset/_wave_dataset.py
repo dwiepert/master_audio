@@ -50,8 +50,9 @@ class WaveDataset(Dataset):
         self.mixup = self._check_existence('mixup')
          
 
-        if self.model_task == 'asr':
+        if self.model_task == 'asr' or self.model_task == 'similarity':
             self.transforms = self._get_asr_transforms()
+
         
         if self.model_task == 'classification':
             if self.model_type == 'ssast':
@@ -96,7 +97,7 @@ class WaveDataset(Dataset):
             self.clip_length = self._check_existence('clip_length')
             self.trim_level = self._check_existence('trim_level')
             
-
+            self.al_transform = []
             return self._getaudiotransforms()
 
         else:
@@ -104,7 +105,8 @@ class WaveDataset(Dataset):
             if self.bucket is not None:
                 assert self.savedir is not None, 'Save dir is necessary for cloud'
             return [torchvision.transforms.Compose([UidToPath(prefix=self.prefix, savedir=self.savedir, bucket=self.bucket)]), []]
-        
+    
+
     def _get_clf_transforms(self):
         """
         Get transforms for Classification task
@@ -138,6 +140,14 @@ class WaveDataset(Dataset):
         self.reverse = self._check_existence('reverse')
         self.room = self._check_existence('room')
         self.tshift= self._check_existence('tshift')
+
+        self.al_transform = self._audiomentation_options()
+        if self.al_transform != []:
+            self.al_transform = Compose(self.al_transform)
+            self.data_augmentation = True
+        else:
+            self.data_augmentation = False
+
 
         transforms = self._getaudiotransforms()
 
@@ -187,12 +197,6 @@ class WaveDataset(Dataset):
         These transformations will always load the audio. 
         :outparam audio_transform: standard transforms
         """
-        al_transform = self._audiomentation_options()
-        if al_transform != []:
-            al_transform = Compose(al_transform)
-            self.data_augmentation = True
-        else:
-            self.data_augmentation = False
 
         waveform_loader = UidToWaveform(prefix = self.prefix, bucket=self.bucket, lib=self.use_librosa)
         transform_list = [waveform_loader]
@@ -231,8 +235,8 @@ class WaveDataset(Dataset):
 
         transforms = [transform]
 
-        if al_transform != []:
-            transforms.append(al_transform)
+        if self.al_transform != []:
+            transforms.append(self.al_transform)
 
         return transforms
     
@@ -368,9 +372,11 @@ class WaveDataset(Dataset):
                     'uid': mix_uid,
                     'targets': mix_targets
                 }
-                sample2 = self.audio_transform(sample2) #load and perform standard transformation
-                if self.al_transform != []:
-                    sample2 = self.al_transform(sample=sample2)["sample"] #audio augmentations
+                sample2 = self.self.transforms[0](sample2) #load and perform standard transformation
+                if self.data_augmentation and self.transforms[1] != []:
+                    sample['waveform'] = self.transforms[1](samples=sample['waveform'], sample_rate = sample['sample_rate']) #audio augmentations
+                    if not self.to_numpy:
+                        sample['waveform'] = torch.from_numpy(sample['waveform']).type(torch.float32)
 
                 sample = mix(sample, sample2)
             

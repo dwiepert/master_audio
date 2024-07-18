@@ -7,3 +7,7 @@ naip_asr/vertexai_support/clf_config.json
 /speech
 test.py
 /.vscode
+args.pkl
+test.csv
+validation.csv
+train.csv

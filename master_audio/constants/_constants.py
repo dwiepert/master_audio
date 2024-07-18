@@ -38,12 +38,13 @@ _SSAST_MODELS_URL = {
 }
 
 _FASTTEXT_MODELS_URL = {
-    '1M': 'https://dl.fbaipublicfiles.com/fasttext/vectors-english/wiki-news-300d-1M.vec.zip',
-    '1M-subwords': 'https://dl.fbaipublicfiles.com/fasttext/vectors-english/wiki-news-300d-1M-subword.vec.zip',
-    '2M': 'https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M.vec.zip',
-    '2M-subwords': 'https://dl.fbaipublicfiles.com/fasttext/vectors-english/crawl-300d-2M-subword.zip'
-}
+    'en':'https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.en.300.bin.gz' 
+   }
 
 _WORD2VEC_MODELS_URL = {
     'word2vec': 'https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit?usp=sharing'
+}
+
+_WORDNET_MODELS_URL = {
+    'wordnet': 'https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/corpora/wordnet.zip'
 }

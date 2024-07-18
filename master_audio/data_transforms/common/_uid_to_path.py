@@ -36,11 +36,9 @@ class UidToPath(object):
                 self.cache[uid] = cache
         
             else:
-
-                with TemporaryDirectory() as tempdir:
-                    save_path = Path(tempdir) /uid
-                    save_path = save_path / 'waveform.wav'
-                    cache['waveform'] = download_file_to_local(temp_wav_path, save_path, self.bucket)
+                save_path = self.savedir /uid
+                save_path = save_path / 'waveform.wav'
+                cache['waveform'] = str(download_file_to_local(temp_wav_path, save_path, self.bucket))
                 
                 cache['metadata'] = load_metadata_from_gcs(self.bucket, self.prefix, uid, 'json')
                 self.cache[uid] = cache
