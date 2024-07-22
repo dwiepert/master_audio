@@ -169,7 +169,7 @@ def main():
     parser.add_argument("--clip_length", default=None, type=int, help="Choose whether to truncate audio. Not required for ASR.")
     parser.add_argument("--trim_db", default=60, type=float, help="specify db threshold for trimming beginning/end silence.")
     #GCS
-    parser.add_argument("--cloud",  nargs="+", type=ast.literal_eval, default=[False, False, False], help="Specify which files are located on the cloud/should be located on the cloud [input_dir, output_dir, checkpoint]")
+    parser.add_argument("-c", "--cloud",  nargs="+", type=ast.literal_eval, default=[False, False, False], help="Specify which files are located on the cloud/should be located on the cloud [input_dir, output_dir, checkpoint]")
     parser.add_argument("--local_dir", default='', help="Specify location to save files downloaded from bucket")
     parser.add_argument('-b','--bucket_name', default='', help="google cloud storage bucket name")
     parser.add_argument('-p','--project_name', default='', help='google cloud platform project name')
