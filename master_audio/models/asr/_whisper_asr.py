@@ -145,7 +145,7 @@ class WhisperForASR:
             assert samplerate is not None, 'If giving audio as waveform, original sampling rate must also be given.'
             audio = self._check_audio(audio, samplerate)
         
-        all = whisper.transcribe(self._model, audio, language="en")
+        all = whisper.transcribe(self._model, audio, language="en", beam_size=5, best_of=5, temperature=(0.0, 0.2, 0.4, 0.6, 0.8, 1.0), vad='auditok')
         transcription = all["text"].lower().strip()
         transcription = transcription.translate(str.maketrans('','',string.punctuation))
 

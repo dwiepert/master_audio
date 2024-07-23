@@ -20,6 +20,7 @@ dependencies:
   - pip:
       - audiomentations==0.36.0
       - audioread==3.0.1
+      - auditok==0.2.0
       - cachetools==5.3.3
       - certifi==2024.6.2
       - cffi==1.16.0
