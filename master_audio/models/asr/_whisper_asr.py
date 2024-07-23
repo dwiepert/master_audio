@@ -87,14 +87,18 @@ class WhisperForASR:
         segments = result["segments"]
         if segments == []:
             return []
-        timestamps = segments[0]["words"]
-        for i in range(len(timestamps)):
-            t = timestamps[i]
-            text = t['text']
-            text = text.lower().strip()
-            text = text.translate(str.maketrans('','',string.punctuation))
-            t['text'] = text
-            timestamps[i] = t
+        timestamps = {}
+        i=0
+        for s in segments:
+            ts=s['words']
+            for j in range(len(ts)):
+                t = ts[j]
+                text = t['text']
+                text = text.lower().strip()
+                text = text.translate(str.maketrans('','',string.punctuation))
+                t['text'] = text
+                timestamps[i] = t
+                i+=1
         
         return timestamps
      
