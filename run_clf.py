@@ -73,6 +73,7 @@ def _check_args(args):
     if args.metadata_csv is not None:
         assert '.csv' in args.metadata_csv[-4:]
 
+    assert args.label_txt is not None
     
     return args
 
@@ -135,7 +136,8 @@ def _load_targets(args):
 
 def _create_dirs(args):
     args.input_dir = Path(args.input_dir)
-    args.label_txt = Path(args.label_txt)
+    if args.label_txt is not None:
+        args.label_txt = Path(args.label_txt)
     args.output_dir = Path(args.output_dir)
     args.checkpoint = Path(args.checkpoint)
     if args.data_split_root is not None and 'gs://' not in args.data_split_root:
@@ -246,7 +248,7 @@ def main():
     parser.add_argument("--md_uid_col", default="originalaudioid")
     parser.add_argument("--md_subject_col", default="record")
     parser.add_argument("--train_proportion", default=.8, help="specify size of train/test split")
-    parser.add_argument('-l','--label_txt', default='./labels_1clf.txt') #default=None #default='./labels.txt'
+    parser.add_argument('-l','--label_txt', default=None) #default=None #default='./labels.txt'
     #Outputs
     parser.add_argument("--save_logs", default=True, type=ast.literal_eval, help="Specify whether to save outputs.")
     parser.add_argument("--output_dir", default= '', help='Set path to directory where outputs should be saved.')
@@ -268,7 +270,7 @@ def main():
     parser.add_argument("--model_type", default="ssast", choices=["w2v2","ssast"], help="specify model type")
     parser.add_argument('--model_size', default='base',help='the size of the model', type=str)
     parser.add_argument("-c", "--checkpoint", default='', help="specify path to pre-trained model weight checkpoint")
-    parser.add_argument("-mp", "--finetuned_mdl_path", default="", help='If running eval-only or extraction, you have the option to load a fine-tuned model by specifying the model path')
+    parser.add_argument("-mp", "--finetuned_mdl_path", default=None, help='If running eval-only or extraction, you have the option to load a fine-tuned model by specifying the model path')
     parser.add_argument("--seed", default=4200, help='Specify a seed for random number generator to make validation set consistent across runs. Accepts None or any valid RandomState input (i.e., int)')
     parser.add_argument("-pm", "--pooling_mode", default="mean", help="specify method of pooling last hidden layer", choices=['mean','sum','max']) #make sure that model specific values are accounted for (ssast only takes mean/sum?)
     #classification head parameters
@@ -333,7 +335,7 @@ def main():
     parser.add_argument("--scheduler", type=str, default=None, help="specify lr scheduler", choices=["onecycle", "None",None])
     parser.add_argument("--max_lr", type=float, default=0.01, help="specify max lr for lr scheduler")
     #OTHER
-    parser.add_argument("--debug", default=True, type=ast.literal_eval)
+    parser.add_argument("--debug", default=False, type=ast.literal_eval)
     parser.add_argument("--hp_tuning", default=False, type=ast.literal_eval)
     parser.add_argument("--new_checkpoint", default=False, type=ast.literal_eval, help="specify if you should use the checkpoint specified in current args for eval")
     args = parser.parse_args()
@@ -410,7 +412,9 @@ def main():
                         'resample_rate':model_args.resample_rate, 'monochannel':model_args.monochannel, 'clip_length': args.clip_length,
                     'trim_level': args.trim_level, 'dataset_mean':args.dataset_mean, 'dataset_std':args.dataset_std, 'padding':'do_not_pad'}
 
-    elif args.mode in ['evaluate', 'extract'] and args.finetuned_mdl_path is None:
+    elif args.mode in ['evaluate'] and args.finetuned_mdl_path is None:
+        raise NotImplementedError()
+    elif args.mode in ['extract'] and args.embedding_type != 'pt' and args.finetuned_mdl_path is None:
         raise NotImplementedError()
     else:
         model_config = {'checkpoint': args.checkpoint, 'mode': args.mode, 'seed': args.seed, 'pooling_mode': args.pooling_mode,

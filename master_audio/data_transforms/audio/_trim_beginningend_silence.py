@@ -21,7 +21,7 @@ class TrimBeginningEndSilence:
             sr = sample['sample_rate']
             beg_trim = taf.vad(waveform, sample_rate=sr, trigger_level=self.threshold)
             if beg_trim.nelement() == 0:
-                print('Waveform may be empty. Currently ignoring. See TrimBeginningEndSilence for more information.')
+                print('Waveform may be empty. Currently skipping trimming. See TrimBeginningEndSilence for more information.')
                 out_waveform = waveform 
             else:
                 rev = torch.flip(beg_trim, [0,1])

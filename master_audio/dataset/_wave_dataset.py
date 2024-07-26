@@ -1,6 +1,7 @@
 #IMPORTS
 import random
 from typing import List, Union
+import warnings
 
 #third party
 from audiomentations import *
@@ -61,8 +62,11 @@ class WaveDataset(Dataset):
                 self.to_spectrogram = False 
             else:
                 raise NotImplementedError()
-        
-            assert self.target_labels is not None, 'Target labels must be given for classification.'
+
+            if self.target_labels is None:
+                warnings.warn('Target labels is None for classification. Confirm that clf is in extract mode.')
+
+            
             assert isinstance(self.data, pd.DataFrame), 'Must give a dataframe of uids and annotations for classification.'
             self.transforms = self._get_clf_transforms()
 

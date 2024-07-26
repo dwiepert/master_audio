@@ -464,7 +464,7 @@ class Classify:
 
         if 'ASTModel' in str(self.model.__class__):
             assert embedding_task is not None, 'Must give an embedding task for AST models'
-        elif 'W2V2' in str(self.model__class__):
+        elif 'W2V2' in str(self.model.__class__):
             embedding_task = None #must have an empty task for w2v2
         else:
             raise NotImplementedError()
@@ -510,22 +510,22 @@ class Classify:
                 with tempfile.TemporaryDirectory() as temp_dir:
                     temp_dir = Path(temp_dir)
                     try:
-                        embd_path = temp_dir / 'embeddings.pqt'
+                        embd_path = temp_dir / f'embeddings_layer{layer}_type{embedding_type}_pm{pooling_mode}.pqt'
                         df_embed.to_parquet(path=embd_path, index=True, engine='pyarrow') #TODO: fix
                     except:
                         print('Unable to save as pqt, saving instead as csv')
-                        embd_path = temp_dir /'embeddings.csv'
+                        embd_path = temp_dir /f'embeddings_layer{layer}_type{embedding_type}_pm{pooling_mode}.csv'
                         df_embed.to_csv(embd_path, index=True)
                     
                     upload_to_gcs(save_dir, embd_path, bucket)
 
             else:
                 try:
-                    embd_path = save_dir / 'embeddings.pqt'
+                    embd_path = save_dir / f'embeddings_layer{layer}_type{embedding_type}_pm{pooling_mode}.pqt'
                     df_embed.to_parquet(path=embd_path, index=True, engine='pyarrow') #TODO: fix
                 except:
                     print('Unable to save as pqt, saving instead as csv')
-                    embd_path = save_dir /'embeddings.csv'
+                    embd_path = save_dir /f'embeddings_layer{layer}_type{embedding_type}_pm{pooling_mode}.csv'
                     df_embed.to_csv(embd_path, index=True)
         
         return embeddings

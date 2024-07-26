@@ -162,6 +162,12 @@ Word error rate (`wer(...)`) and character error rate (`cer(...)`)are both imple
 ## Using Classification Models
 See examples of using Classification models in [run_clf.py](https://github.com/dwiepert/master_audio/blob/main/run_clf.py). The primary code for running classification models is in [`_clf_model_wrapper.py`](https://github.com/dwiepert/master_audio/blob/main/master_audio/tasks/_clf_model_wrapper.py) and [_classify.py](https://github.com/dwiepert/master_audio/blob/main/master_audio/tasks/_classify.py). The arguments that are required in each config dictionary are included in `run_clf.py`. 
 
+### Wider annotations
+Annotations currently are saved as a csv with a feature column of the feature names and a score column. The code expects the format to have the feature names as columns and the scores as values. Please refer to [create_wider_annotations.Rmd](https://github.com/dwiepert/master_audio/blob/main/create_wider_annotations.Rmd) for an example of how to do this. 
+
+### TASK FILTERING
+To select tasks, you must do so in the metadata.csv (see Wider annotations). The example [create_wider_annotations.Rmd](https://github.com/dwiepert/master_audio/blob/main/create_wider_annotations.Rmd) includes task filtering.
+
 ### Datasplit
 When running classification, generating a datasplit is required. The data splits are expected to be in a single directory with the names `train.csv` and `test.csv` with an optional `validation.csv`. If a datasplit is not already prepared, one can be generated with [generate_datasplit(...)](https://github.com/dwiepert/master_audio/blob/main/master_audio/dataset/_datasplit.py). See code for required arguments. Note that the metadata for the datasplit must be a csv with the target labels included as columns and at least a uid column (optionally also a subject column). The datasplit can then be generated at either the file or subject level.
 
@@ -214,7 +220,9 @@ You must also consider where you want the embeddings to be extracted from. The o
 4. From a layer in the classification head that has been finetuned? Set `embedding_type` to 'ft'. This version requires specification of `pooling_mode` to merge embeddings if there are multiple classifiers. It only accepts "mean" or "sum" for merging, and if nothing is specified it will use the pooling_mode set with the model. It will always return the output from the first dense layer in the classification head, prior to any activation function or normalization. 
 
 Brief note on target labels:
-Embedding extraction is the only mode where target labels are not required. You can give a csv with only uid names  it will still function and extract embeddings.
+Embedding extraction is the only mode where target labels are not required. You can give a csv with only uid names it will still function and extract embeddings.
+
+*** You must still give a label.txt in order for the model to be built correctly. If you have a finetuned model and args, this label.txt should be the same form as the one for the original finetuned model. 
 
 ## Calculating word similarity
 You can initialize and run `get_similarity_matrix(transcription)` for `FastText`, `Word2Vec`, and `WordNet` models to get a similarity matrix of all words in a single transcription. For an example of calculating word similarity on a structured dataset, see [`run_word_sim.py`](https://github.com/dwiepert/master_audio/blob/main/). This uses the base ASR dataset with `load_waveform` as False, so that the dataset only loads metadata (where transcriptions should be stored after `run_ASR.py`). 
@@ -229,3 +237,6 @@ To calculate word similarty with this code, you must specify the following:
 
 By default, this will save the output as a json in the ouput directory. The results have the following format:
 {uid: {'transcription': Str, 'words': List[str], 'similarity':Matrix}}
+
+
+Note: I wasn't able to fully test everything so sorry for any lingering bugs! - Daniela

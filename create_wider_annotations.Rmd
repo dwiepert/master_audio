@@ -1,0 +1,24 @@
+---
+title: "generate datasplit"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+```
+
+```{r get-ids}
+
+md_path <- ''
+annotation_path <-''
+save_path <- ''
+
+md <- read.csv(md_path) %>% filter(task %in% c('Word Repetition: Catastrophe','Word Repetition: Catastrophe Slow', 'Word Repetition: Catastrophe Fast')) %>% select(originalaudioid, record)
+
+annots <- read.csv(annotation_path) %>% filter(originalaudioid %in% md$originalaudioid) %>% select(originalaudioid, feature, score) %>% filter(score!=-1, score!=6) %>% group_by(originalaudioid, feature) %>% summarize(score=max(score)) %>% ungroup()%>% pivot_wider(names_from=feature, values_from=score) %>% merge(md, by="originalaudioid", type='left')
+
+write.csv(annots,save_path)
+ 
+```

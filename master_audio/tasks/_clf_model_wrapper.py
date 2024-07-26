@@ -213,7 +213,13 @@ class ClassificationWrapper():
         else:
             raise NotImplementedError()
 
-        if self.mode in ['evaluate', 'extract']:
+        if self.mode in ['evaluate']:
+            assert self.finetuned_mdl_path is not None, 'must load a model'
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            sd = torch.load(self.finetuned_mdl_path, map_location=device)
+            self.model.load_state_dict(sd, strict=False)
+
+        elif self.mode in ['extract'] and self.embedding_type != 'pt':
             assert self.finetuned_mdl_path is not None, 'must load a model'
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
             sd = torch.load(self.finetuned_mdl_path, map_location=device)
@@ -287,5 +293,5 @@ class ClassificationWrapper():
             else:
                 self.task = None
             run_clf.extract(dataloader=self.eval_loader, embedding_type=self.embedding_type, layer=self.layer,
-                            pooling_mode = self.pooling_mode, task=self.task, save=True, save_dir=self.output_dir,
+                            pooling_mode = self.pooling_mode, embedding_task=self.task, save=True, save_dir=self.output_dir,
                             cloud=self.cloud['output'], bucket=self.bucket)

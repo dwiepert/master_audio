@@ -11,3 +11,7 @@ args.pkl
 test.csv
 validation.csv
 train.csv
+.Rproj.user
+.Rhistory
+label1.txt
+master_audio.Rproj
