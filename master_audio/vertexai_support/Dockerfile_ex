@@ -1,0 +1,26 @@
+# use a Google maintained base image hosted in 
+# Google's container registry
+FROM gcr.io/deeplearning-platform-release/pytorch-gpu.1-13.py310
+
+#Upgrade pip
+RUN pip install --upgrade pip
+
+# Create the repos directory
+RUN mkdir -p /repos
+RUN mkdir -p /staging
+
+# Copy downloaded repositories to working dir
+COPY . /staging
+
+# separate the repositories from one another
+RUN mkdir -p /repos/master_audio && \ 
+    mv /staging/* /repos/master_audio
+
+
+# Install environment
+RUN conda update conda
+RUN conda env update -n base -f /repos/master_audio/environment.yml
+
+# Cleanup
+RUN rm -rf /staging && \
+    rm -rf /repos

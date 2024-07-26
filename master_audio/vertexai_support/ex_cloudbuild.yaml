@@ -1,0 +1,11 @@
+steps:
+
+# Build Docker image
+- name: 'gcr.io/cloud-builders/docker' 
+  script: | # Line to run on the command line in the VM 
+    docker build -t us-central1-docker.pkg.dev/PROJECT/NAME:tag . 
+images: # actual name of the image including the full artifact repository path (<repository_path>/<image_name:tag>)
+- 'us-central1-docker.pkg.dev/PROJECT/NAME:tag'
+timeout: 7200s
+options: 
+  logging: CLOUD_LOGGING_ONLY

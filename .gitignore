@@ -15,3 +15,7 @@ train.csv
 .Rhistory
 label1.txt
 master_audio.Rproj
+example_job.ipynb
+cloudbuild.yaml
+Dockerfile
+run_clf_config.json

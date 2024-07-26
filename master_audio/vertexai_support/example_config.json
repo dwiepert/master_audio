@@ -1,0 +1,22 @@
+{
+  "workerPoolSpecs": [
+    {
+      "machineSpec": {
+        "machineType": "n1-highmem-2",
+        "acceleratorType": "NVIDIA_TESLA_T4",
+        "acceleratorCount": 1
+      },
+      "replicaCount": "1",
+      "diskSpec": {
+        "bootDiskType": "pd-ssd",
+        "bootDiskSizeGb": 100
+      },
+      "containerSpec": {
+        "imageUri": "TODO", 
+        "args": [
+          "--ARG1=arg1_val"
+        ]
+      }
+    }
+  ]
+}

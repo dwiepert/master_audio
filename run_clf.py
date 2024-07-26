@@ -253,7 +253,7 @@ def main():
     parser.add_argument("--save_logs", default=True, type=ast.literal_eval, help="Specify whether to save outputs.")
     parser.add_argument("--output_dir", default= '', help='Set path to directory where outputs should be saved.')
     #GCS
-    parser.add_argument("--cloud",  nargs="+", type=ast.literal_eval, default=[False, False, False, False, False, False], help="Specify which files are located on the cloud/should be located on the cloud [input_dir, label_txt, output_dir, checkpoint, finetuned_mdl_path, data_split_root]")
+    parser.add_argument("-c", "--cloud",  nargs="+", type=ast.literal_eval, default=[False, False, False, False, False, False], help="Specify which files are located on the cloud/should be located on the cloud [input_dir, label_txt, output_dir, checkpoint, finetuned_mdl_path, data_split_root]")
     parser.add_argument("--local_dir", default='', help="Specify location to save files downloaded from bucket")
     parser.add_argument('-b','--bucket_name', default='', help="google cloud storage bucket name")
     parser.add_argument('-p','--project_name', default='', help='google cloud platform project name')
@@ -327,7 +327,7 @@ def main():
     #Training Parameters
     parser.add_argument("-bs", "--batch_size", type=int, default=1, help="specify batch size")
     parser.add_argument("-nw", "--num_workers", type=int, default=0, help="specify number of parallel jobs to run for data loader")
-    parser.add_argument("-lr", "--learning_rate", type=float, default=0.0003, help="specify learning rate")
+    parser.add_argument("-lr", "--learning_rate", type=float, default=0.001, help="specify learning rate")
     parser.add_argument("-e", "--epochs", type=int, default=1, help="specify number of training epochs")
     parser.add_argument("--optim", type=str, default="adamw", help="training optimizer", choices=["adam", "adamw"])
     parser.add_argument("--weight_decay", type=float, default=.0001, help='specify weight decay for adamw')
