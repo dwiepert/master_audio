@@ -1,4 +1,6 @@
 # Ready to run Audio tasks for NAIP
+NOTE: Supplemental private files are available in the google cloud bucket. 
+
 This is a package that includes a number of functions to help you run audio tasks such as ASR, pathological feature classification, and word similarity. Ready to use run functions are also available for each of the tasks. If using the run functions, it will generally expect that you have access to a structured NAIP dataset where each uid has its own folder with a `waveform.wav` file and `metadata.json` file. The exception is ASR which will allow you to generate transcriptions for a folder of `.wav` files. 
 
 ## Installation

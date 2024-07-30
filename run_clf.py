@@ -2,6 +2,7 @@
 """
 import argparse
 import ast
+import copy
 import glob
 import itertools
 import os
@@ -14,7 +15,7 @@ from google.cloud import storage
 import torch
 
 from master_audio.io import download_checkpoint_from_gcs, upload_to_gcs, search_gcs, download_file_to_local
-from master_audio.dataset import generate_datasplit
+from master_audio.dataset import _generate_datasplit
 from master_audio.models.classification import *
 from master_audio.tasks import ClassificationWrapper
 
@@ -175,7 +176,7 @@ def _create_dirs(args):
 
 def _dump_arguments(args):
     if args.mode=='finetune':
-        args_temp = args
+        args_temp = copy.copy(args)
         args_temp.bucket = None
         #only save args if training a model. 
 
@@ -230,8 +231,8 @@ def _check_datasplit(args):
                 args.cloud['datasplit'] = True 
             else:
                 args.cloud['datasplit'] = False
-            _ = generate_datasplit(args.input_dir, args.data_split_root, args.cloud, args.train_proportion, args.val_size, args.bucket, args.metadata_csv, args.md_uid_col, args.md_subject_col)
-
+            out = _generate_datasplit(args.input_dir, args.data_split_root, args.cloud, args.train_proportion, args.val_size, args.bucket, args.metadata_csv, args.md_uid_col, args.md_subject_col)
+            args.data_split_root=out[3]
     # else:
     #     if args.data_split_root is None:
     #         args.data_split_root =     args.output_dir
@@ -253,7 +254,7 @@ def main():
     parser.add_argument("--save_logs", default=True, type=ast.literal_eval, help="Specify whether to save outputs.")
     parser.add_argument("--output_dir", default= '', help='Set path to directory where outputs should be saved.')
     #GCS
-    parser.add_argument("-c", "--cloud",  nargs="+", type=ast.literal_eval, default=[False, False, False, False, False, False], help="Specify which files are located on the cloud/should be located on the cloud [input_dir, label_txt, output_dir, checkpoint, finetuned_mdl_path, data_split_root]")
+    parser.add_argument("-cl", "--cloud",  nargs="+", type=ast.literal_eval, default=[False, False, False, False, False, False], help="Specify which files are located on the cloud/should be located on the cloud [input_dir, label_txt, output_dir, checkpoint, finetuned_mdl_path, data_split_root]")
     parser.add_argument("--local_dir", default='', help="Specify location to save files downloaded from bucket")
     parser.add_argument('-b','--bucket_name', default='', help="google cloud storage bucket name")
     parser.add_argument('-p','--project_name', default='', help='google cloud platform project name')
@@ -355,6 +356,7 @@ def main():
     
     args = _create_dirs(args)
 
+    
     args = _check_cloud(args)
     args = _load_targets(args)
     args = _check_datasplit(args)

@@ -3,6 +3,7 @@ import pandas as pd
 import random
 import tempfile
 import json
+import os
 
 from pathlib import Path
 from typing import List, Union
@@ -10,7 +11,7 @@ from typing import List, Union
 from master_audio.io import search_gcs, upload_to_gcs
 
 
-def generate_datasplit(input_dir: Union[str, Path], datasplit_dir: Union[str, Path], cloud: dict, 
+def _generate_datasplit(input_dir: Union[str, Path], datasplit_dir: Union[str, Path], cloud: dict, 
                        train_proportion:float=.8, val_size:int=50, bucket=None, metadata_csv: Union[str,Path]=None, 
                        uid_col: str = 'originalaudioid', subject_col: str='record') -> tuple[Path, Path, Path]:
     """
@@ -88,19 +89,21 @@ def generate_datasplit(input_dir: Union[str, Path], datasplit_dir: Union[str, Pa
     output_test = datasplit_dir / 'test.csv'
     output_val = datasplit_dir /'validation.csv'
 
+    if not datasplit_dir.exists():
+        if cloud['datasplit']:
+            os.makedirs('.' / datasplit_dir)
+        else:
+            os.makedirs(datasplit_dir)
+
+    train_df.to_csv(output_train, index=True)
+    test_df.to_csv(output_test, index=True)
+    val_df.to_csv(output_val, index=True)
     if cloud['datasplit']:
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            train_path = Path(tmpdirname) / 'train.csv'
-            val_path = Path(tmpdirname) /'validation.csv'
-            test_path = Path(tmpdirname) / 'test.csv'
-            train_df.to_csv(train_path, index=True)
-            val_df.to_csv(val_path, index=True)
-            test_df.to_csv(test_path, index=True)
-            upload_to_gcs(output_train, train_path, bucket)
-            upload_to_gcs(output_test, test_path, bucket)
-    else:
-        train_df.to_csv(output_train, index=True)
-        test_df.to_csv(output_test, index=True)
-        val_df.to_csv(output_val, index=True)
-    
-    return output_train, output_val, output_test
+        upload_tr = '.' / output_train
+        upload_te = '.' / output_test
+        upload_v = '.' / output_val
+        upload_to_gcs(upload_tr, output_train,  bucket)
+        upload_to_gcs(upload_te, output_test,  bucket)
+        upload_to_gcs(upload_v, output_val, bucket)
+
+    return output_train, output_val, output_test, datasplit_dir

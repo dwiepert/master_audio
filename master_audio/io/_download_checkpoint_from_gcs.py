@@ -18,10 +18,12 @@ def download_checkpoint_from_gcs(checkpoint_prefix: Union[str, Path], local_path
     :param bucket: gcs bucket
     """
     checkpoint_prefix = Path(checkpoint_prefix)
-    local_path = Path(local_path).absolute()
+    local_path = Path(local_path)
 
     if local_path.is_dir() and not local_path.exists():
         os.makedirs(local_path)
+        print(f'Local path: {str(local_path)}')
+        print(f'Local path exists: {local_path.exists()}')
    #else:
     #    if local_path.parents[0].is_dir() and not local_path.parents[0].exists():
      #       os.makedirs(local_path.parents[0])

@@ -305,7 +305,7 @@ class Classify:
             self.model.train()
             for batch in tqdm(dataloader_train):
                 if self.data_type == 'waveform':
-                    x = torch.squeeze(batch[self.data_type][0], dim=1)
+                    x = torch.squeeze(batch[self.data_type], dim=1)
                 else:
                     x = batch[self.data_type]
                 targets = batch['targets']
